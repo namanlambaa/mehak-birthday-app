@@ -1,0 +1,333 @@
+/* ===== Glass Card ===== */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 28px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.2s ease;
+  user-select: none;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-pink), var(--accent-lavender));
+  color: #fff;
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-primary:active {
+  box-shadow: 0 0 16px rgba(232, 135, 156, 0.35);
+}
+
+.btn-ghost {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.85rem;
+  padding: 10px 20px;
+}
+
+.btn-full { width: 100%; }
+
+/* ===== Login ===== */
+.login-card {
+  width: 100%;
+  max-width: 350px;
+  padding: 36px 28px 32px;
+  text-align: center;
+}
+
+.login-icon {
+  font-size: 2.8rem;
+  margin-bottom: 8px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.login-title {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.login-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.input-group {
+  margin-bottom: 14px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-group input::placeholder {
+  color: var(--text-muted);
+}
+
+.input-group input:focus {
+  border-color: var(--accent-pink-light);
+  box-shadow: 0 0 0 3px rgba(232, 135, 156, 0.15);
+}
+
+.login-error {
+  color: var(--accent-rose);
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+}
+
+#login-form .btn {
+  margin-top: 8px;
+}
+
+/* ===== Dashboard ===== */
+.dash-header {
+  text-align: center;
+  padding-top: 8px;
+}
+
+.dash-title {
+  font-size: 1.25rem;
+  line-height: 1.35;
+  margin-bottom: 12px;
+}
+
+.dash-desc {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.daily-message {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--accent-pink);
+  font-style: italic;
+  min-height: 1.2em;
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.stat-card {
+  padding: 20px 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-card-wide {
+  grid-column: 1 / -1;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent-pink);
+  min-height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.btn-play {
+  margin-top: 4px;
+  padding: 17px 28px;
+  font-size: 1rem;
+}
+
+.play-status {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: -8px;
+}
+
+/* ===== Contest ===== */
+.btn-back {
+  align-self: flex-start;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: 6px 2px;
+  transition: opacity 0.15s ease;
+}
+
+.btn-back:active { opacity: 0.6; }
+
+.contest-title {
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.contest-body {
+  padding: 24px 20px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  min-height: 120px;
+}
+
+.contest-input-area {
+  margin-top: 4px;
+}
+
+.contest-answer {
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--glass-border);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  resize: none;
+  line-height: 1.5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contest-answer:focus {
+  border-color: var(--accent-pink-light);
+  box-shadow: 0 0 0 3px rgba(232, 135, 156, 0.15);
+}
+
+.contest-sticky-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px calc(16px + var(--safe-bottom));
+  background: linear-gradient(to top, rgba(253, 226, 228, 0.95) 60%, transparent);
+}
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(60, 48, 64, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 100;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.modal-overlay[hidden] { display: none; }
+
+.modal-card {
+  width: 100%;
+  max-width: 320px;
+  padding: 36px 28px 28px;
+  text-align: center;
+  animation: scaleIn 0.3s ease-out;
+}
+
+.modal-icon {
+  font-size: 2.6rem;
+  margin-bottom: 10px;
+}
+
+.modal-title {
+  font-size: 1.15rem;
+  margin-bottom: 8px;
+}
+
+.modal-text {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+
+/* ===== Shimmer / Loading ===== */
+.shimmer-placeholder {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-placeholder::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+  animation: shimmer 1.5s infinite;
+}
+
+.shimmer-placeholder.loaded::after {
+  display: none;
+}
+
+.shimmer-block {
+  height: 20px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.35);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.shimmer-block.short { width: 60%; }
+
+.shimmer-block::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+  animation: shimmer 1.5s infinite;
+}
+
+/* ===== Confetti Canvas ===== */
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 200;
+}
