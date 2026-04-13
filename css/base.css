@@ -1,0 +1,76 @@
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-weight: 600; line-height: 1.25; }
+
+a { color: var(--accent-pink); text-decoration: none; }
+
+input, textarea, button {
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+button { cursor: pointer; }
+
+/* View system */
+.view {
+  display: none;
+  position: fixed;
+  inset: 0;
+  padding: calc(20px + var(--safe-top)) 20px calc(20px + var(--safe-bottom));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.view.active {
+  display: flex;
+  flex-direction: column;
+  animation: viewEnter 0.4s ease-out both;
+}
+
+/* Scrollable inner containers */
+.dashboard-scroll,
+.contest-scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 24px;
+}
+
+/* Make login centered */
+#view-login {
+  align-items: center;
+  justify-content: center;
+}
+
+/* Contest needs room for sticky bottom */
+#view-contest {
+  padding-bottom: 0;
+}
+
+.contest-scroll {
+  padding-bottom: 100px;
+}
