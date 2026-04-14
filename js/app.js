@@ -141,7 +141,7 @@
             var triesLeft = Store.getFlappyTriesLeft(data);
             if (triesLeft <= 0) {
               els.btnPlay.disabled = true;
-              els.playStatus.textContent = 'All 15 tries used! Your best score: ' + (data.flappyBestScore || 0) + ' pts 💖';
+              els.playStatus.textContent = 'All 15 tries used! Total earned: ' + (data.flappyTotalEarned || 0) + ' pts 💖';
               els.playStatus.hidden = false;
             } else {
               els.btnPlay.disabled = false;
@@ -226,16 +226,16 @@
 
     Store.getUserDoc().then(function (data) {
       var triesLeft = Store.getFlappyTriesLeft(data);
-      var best = data.flappyBestScore || 0;
-      updateFlappyTriesUI(triesLeft, best);
+      var earned = data.flappyTotalEarned || 0;
+      updateFlappyTriesUI(triesLeft, earned);
     }).catch(function () {
       updateFlappyTriesUI(Store.FLAPPY_MAX_TRIES, 0);
     });
   }
 
-  function updateFlappyTriesUI(triesLeft, bestScore) {
+  function updateFlappyTriesUI(triesLeft, totalEarned) {
     els.flappyTriesLeft.textContent = triesLeft;
-    els.flappyBestScore.textContent = bestScore;
+    els.flappyBestScore.textContent = totalEarned;
 
     if (triesLeft <= 0) {
       els.btnStartGraded.textContent = 'All 15 tries used!';
@@ -270,18 +270,13 @@
     Store.submitFlappyTry(points)
       .then(function (result) {
         flappySubmitting = false;
-        updateFlappyTriesUI(result.triesLeft, result.bestScore);
+        updateFlappyTriesUI(result.triesLeft, result.totalEarned);
 
-        var msg;
-        if (result.isNewBest) {
-          Confetti.launch(3000);
-          msg = 'New best! ' + result.bestScore + ' pts saved. ' + result.triesLeft + ' tries left.';
-        } else {
-          msg = 'You scored ' + points + ' pts. Best is still ' + result.bestScore + ' pts. ' + result.triesLeft + ' tries left.';
-        }
+        Confetti.launch(2000);
+        var msg = '+' + points + ' pts! Total earned: ' + result.totalEarned + ' pts. ' + result.triesLeft + ' tries left.';
 
         if (result.triesLeft <= 0) {
-          msg += ' All tries used — final score: ' + result.bestScore + ' pts!';
+          msg = '+' + points + ' pts! All 15 tries used — grand total: ' + result.totalEarned + ' pts!';
         }
 
         FlappyGame.startPractice();
