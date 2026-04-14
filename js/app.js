@@ -25,6 +25,8 @@
     els.btnSubmit = document.getElementById('btn-submit');
     els.flappyBack = document.getElementById('flappy-back');
     els.btnStartGraded = document.getElementById('btn-start-graded');
+    els.flappyTriesLeft = document.getElementById('flappy-tries-left');
+    els.flappyBestScore = document.getElementById('flappy-best-score');
 
     els.modalOverlay = document.getElementById('modal-overlay');
     els.btnModalHome = document.getElementById('btn-modal-home');
@@ -127,19 +129,33 @@
         markLoaded(els.statPoints);
 
         var isAdmin = Auth.isAdmin();
-        var alreadyPlayed = Store.hasPlayedToday(data);
 
-        if (!isAdmin && alreadyPlayed) {
-          els.btnPlay.disabled = true;
-          els.playStatus.textContent = "You've already played today! Come back tomorrow 💫";
-          els.playStatus.hidden = false;
-        } else {
-          els.btnPlay.disabled = false;
+        return Store.getCurrentContest().then(function (contest) {
+          var isFlappy = contest && contest.type === 'flappy';
+
           if (isAdmin) {
+            els.btnPlay.disabled = false;
             els.playStatus.textContent = '🔧 Admin mode — testing only';
             els.playStatus.hidden = false;
+          } else if (isFlappy) {
+            var triesLeft = Store.getFlappyTriesLeft(data);
+            if (triesLeft <= 0) {
+              els.btnPlay.disabled = true;
+              els.playStatus.textContent = 'All 15 tries used! Your best score: ' + (data.flappyBestScore || 0) + ' pts 💖';
+              els.playStatus.hidden = false;
+            } else {
+              els.btnPlay.disabled = false;
+              els.playStatus.textContent = triesLeft + ' graded tries remaining 🎮';
+              els.playStatus.hidden = false;
+            }
+          } else if (Store.hasPlayedToday(data)) {
+            els.btnPlay.disabled = true;
+            els.playStatus.textContent = "You've already played today! Come back tomorrow 💫";
+            els.playStatus.hidden = false;
+          } else {
+            els.btnPlay.disabled = false;
           }
-        }
+        });
       })
       .catch(function (err) {
         console.error('Failed to load user data:', err);
@@ -193,8 +209,10 @@
   function openFlappyContest() {
     Router.navigate('view-flappy');
     flappySubmitting = false;
-    els.btnStartGraded.disabled = false;
-    els.btnStartGraded.textContent = 'Start Graded Game';
+    els.btnStartGraded.disabled = true;
+    els.btnStartGraded.textContent = 'Loading...';
+    els.flappyTriesLeft.textContent = '—';
+    els.flappyBestScore.textContent = '0';
 
     if (!window.FlappyGame) {
       alert('Flappy game failed to load.');
@@ -205,6 +223,27 @@
     FlappyGame.init({
       onGradedEnd: handleFlappyGradedEnd
     });
+
+    Store.getUserDoc().then(function (data) {
+      var triesLeft = Store.getFlappyTriesLeft(data);
+      var best = data.flappyBestScore || 0;
+      updateFlappyTriesUI(triesLeft, best);
+    }).catch(function () {
+      updateFlappyTriesUI(Store.FLAPPY_MAX_TRIES, 0);
+    });
+  }
+
+  function updateFlappyTriesUI(triesLeft, bestScore) {
+    els.flappyTriesLeft.textContent = triesLeft;
+    els.flappyBestScore.textContent = bestScore;
+
+    if (triesLeft <= 0) {
+      els.btnStartGraded.textContent = 'All 15 tries used!';
+      els.btnStartGraded.disabled = true;
+    } else {
+      els.btnStartGraded.textContent = 'Start Graded Game (' + triesLeft + ' left)';
+      els.btnStartGraded.disabled = false;
+    }
   }
 
   function handleStartGradedGame() {
@@ -224,35 +263,36 @@
       els.btnStartGraded.disabled = false;
       flappySubmitting = false;
       FlappyGame.startPractice();
-      showModal('Admin test run complete. Score: ' + points + ' (no points saved).');
+      showModal('Admin test run. Score: ' + points + ' (no points saved).');
       return;
     }
 
-    Store.getUserDoc()
-      .then(function (freshData) {
-        if (Store.hasPlayedToday(freshData)) {
-          els.btnStartGraded.textContent = 'Already Played Today';
-          els.btnStartGraded.disabled = true;
-          showModal("You've already played today! Points were already counted. 💖");
-          flappySubmitting = false;
-          return;
+    Store.submitFlappyTry(points)
+      .then(function (result) {
+        flappySubmitting = false;
+        updateFlappyTriesUI(result.triesLeft, result.bestScore);
+
+        var msg;
+        if (result.isNewBest) {
+          Confetti.launch(3000);
+          msg = 'New best! ' + result.bestScore + ' pts saved. ' + result.triesLeft + ' tries left.';
+        } else {
+          msg = 'You scored ' + points + ' pts. Best is still ' + result.bestScore + ' pts. ' + result.triesLeft + ' tries left.';
         }
 
-        return Store.submitContest(points).then(function () {
-          els.btnStartGraded.textContent = 'Graded Game Finished';
-          els.btnStartGraded.disabled = true;
-          FlappyGame.stop();
-          Confetti.launch(3000);
-          showModal('Your flappy score was ' + points + ' points. Added to your total.');
-          flappySubmitting = false;
-        });
+        if (result.triesLeft <= 0) {
+          msg += ' All tries used — final score: ' + result.bestScore + ' pts!';
+        }
+
+        FlappyGame.startPractice();
+        showModal(msg);
       })
       .catch(function (err) {
-        console.error('Flappy score submit failed:', err);
+        console.error('Flappy try submit failed:', err);
         flappySubmitting = false;
         els.btnStartGraded.disabled = false;
         els.btnStartGraded.textContent = 'Start Graded Game';
-        alert('Something went wrong while saving your score. Please try again.');
+        alert('Something went wrong. Please try again.');
       });
   }
 
