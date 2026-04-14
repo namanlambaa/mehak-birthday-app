@@ -11,6 +11,9 @@
   var isReady = false;
   var isBound = false;
 
+  var birdImg = new Image();
+  birdImg.src = 'assets/mehak.jpeg';
+
   var state = {
     mode: 'practice',
     running: false,
@@ -31,7 +34,7 @@
   var PIPE_SPAWN_MS = 1450;
   var GRAVITY = 0.35;
   var FLAP = -7.2;
-  var BIRD_R = 14;
+  var BIRD_R = 20;
   var RIGGED_POINT_LIMIT = 900;
 
   function init(options) {
@@ -254,19 +257,26 @@
     var b = state.bird;
     if (!b) return;
 
-    ctx.fillStyle = '#ffd56b';
-    circle(b.x, b.y, b.r);
-
-    ctx.fillStyle = '#ff9f43';
+    ctx.save();
     ctx.beginPath();
-    ctx.moveTo(b.x + b.r - 2, b.y);
-    ctx.lineTo(b.x + b.r + 10, b.y - 4);
-    ctx.lineTo(b.x + b.r + 10, b.y + 4);
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
     ctx.closePath();
-    ctx.fill();
+    ctx.clip();
 
-    ctx.fillStyle = '#3d3040';
-    circle(b.x + 4, b.y - 5, 2.7);
+    if (birdImg.complete && birdImg.naturalWidth > 0) {
+      ctx.drawImage(birdImg, b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
+    } else {
+      ctx.fillStyle = '#ffd56b';
+      ctx.fill();
+    }
+
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.strokeStyle = '#e8879c';
+    ctx.lineWidth = 2;
+    ctx.stroke();
   }
 
   function spawnPipe() {
