@@ -3,6 +3,7 @@
   var els = {};
   var currentContest = null;
   var userData = null;
+  var flappySubmitting = false;
 
   function cacheDom() {
     els.loginForm = document.getElementById('login-form');
@@ -22,6 +23,8 @@
     els.contestBody = document.getElementById('contest-body');
     els.contestAnswer = document.getElementById('contest-answer');
     els.btnSubmit = document.getElementById('btn-submit');
+    els.flappyBack = document.getElementById('flappy-back');
+    els.btnStartGraded = document.getElementById('btn-start-graded');
 
     els.modalOverlay = document.getElementById('modal-overlay');
     els.btnModalHome = document.getElementById('btn-modal-home');
@@ -54,6 +57,13 @@
       showDashboard();
     });
     els.btnSubmit.addEventListener('click', handleSubmit);
+    els.flappyBack.addEventListener('click', function () {
+      if (window.FlappyGame) {
+        FlappyGame.stop();
+      }
+      showDashboard();
+    });
+    els.btnStartGraded.addEventListener('click', handleStartGradedGame);
     els.btnModalHome.addEventListener('click', function () {
       hideModal();
       showDashboard();
@@ -91,6 +101,9 @@
 
   // ==================== Dashboard ====================
   function showDashboard() {
+    if (window.FlappyGame) {
+      FlappyGame.stop();
+    }
     Router.navigate('view-dashboard');
     loadDashboardData();
   }
@@ -150,8 +163,97 @@
 
   // ==================== Contest ====================
   function handlePlayContest() {
-    Router.navigate('view-contest');
-    loadContest();
+    els.btnPlay.disabled = true;
+    Store.getCurrentContest()
+      .then(function (contest) {
+        if (!contest) {
+          els.btnPlay.disabled = false;
+          els.playStatus.textContent = 'No contest available today. Check back later!';
+          els.playStatus.hidden = false;
+          return;
+        }
+
+        if (contest.type === 'flappy') {
+          currentContest = contest;
+          openFlappyContest();
+          return;
+        }
+
+        Router.navigate('view-contest');
+        loadContest();
+      })
+      .catch(function (err) {
+        console.error('Failed to detect contest type:', err);
+        els.btnPlay.disabled = false;
+        els.playStatus.textContent = 'Could not start contest. Please try again.';
+        els.playStatus.hidden = false;
+      });
+  }
+
+  function openFlappyContest() {
+    Router.navigate('view-flappy');
+    flappySubmitting = false;
+    els.btnStartGraded.disabled = false;
+    els.btnStartGraded.textContent = 'Start Graded Game';
+
+    if (!window.FlappyGame) {
+      alert('Flappy game failed to load.');
+      showDashboard();
+      return;
+    }
+
+    FlappyGame.init({
+      onGradedEnd: handleFlappyGradedEnd
+    });
+  }
+
+  function handleStartGradedGame() {
+    if (!window.FlappyGame || flappySubmitting) return;
+    els.btnStartGraded.disabled = true;
+    els.btnStartGraded.textContent = 'Graded Game Running...';
+    FlappyGame.startGraded();
+  }
+
+  function handleFlappyGradedEnd(points) {
+    if (flappySubmitting) return;
+    flappySubmitting = true;
+
+    var isAdmin = Auth.isAdmin();
+    if (isAdmin) {
+      els.btnStartGraded.textContent = 'Start Graded Game';
+      els.btnStartGraded.disabled = false;
+      flappySubmitting = false;
+      FlappyGame.startPractice();
+      showModal('Admin test run complete. Score: ' + points + ' (no points saved).');
+      return;
+    }
+
+    Store.getUserDoc()
+      .then(function (freshData) {
+        if (Store.hasPlayedToday(freshData)) {
+          els.btnStartGraded.textContent = 'Already Played Today';
+          els.btnStartGraded.disabled = true;
+          showModal("You've already played today! Points were already counted. 💖");
+          flappySubmitting = false;
+          return;
+        }
+
+        return Store.submitContest(points).then(function () {
+          els.btnStartGraded.textContent = 'Graded Game Finished';
+          els.btnStartGraded.disabled = true;
+          FlappyGame.stop();
+          Confetti.launch(3000);
+          showModal('Your flappy score was ' + points + ' points. Added to your total.');
+          flappySubmitting = false;
+        });
+      })
+      .catch(function (err) {
+        console.error('Flappy score submit failed:', err);
+        flappySubmitting = false;
+        els.btnStartGraded.disabled = false;
+        els.btnStartGraded.textContent = 'Start Graded Game';
+        alert('Something went wrong while saving your score. Please try again.');
+      });
   }
 
   function loadContest() {

@@ -242,6 +242,86 @@
   background: linear-gradient(to top, rgba(253, 226, 228, 0.95) 60%, transparent);
 }
 
+/* ===== Flappy Contest ===== */
+.flappy-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 16px;
+}
+
+.flappy-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  min-height: 480px;
+}
+
+#flappy-canvas {
+  display: block;
+  width: 100%;
+  height: 480px;
+  border-radius: var(--radius-lg);
+  touch-action: none;
+}
+
+.flappy-score-overlay {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 6px 10px;
+  border-radius: var(--radius-full);
+  background: var(--glass-bg-heavy);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  z-index: 3;
+}
+
+.flappy-mode-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 6px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--glass-border);
+  color: var(--accent-pink);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  z-index: 3;
+}
+
+.flappy-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  color: #fff;
+  font-weight: 600;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.flappy-overlay-card {
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: rgba(61, 48, 64, 0.38);
+  line-height: 1.45;
+  max-width: 270px;
+}
+
+#btn-start-graded[disabled] {
+  opacity: 0.6;
+}
+
 /* ===== Modal ===== */
 .modal-overlay {
   position: fixed;
