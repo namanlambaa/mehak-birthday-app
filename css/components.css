@@ -428,6 +428,118 @@
   animation: shimmer 1.5s infinite;
 }
 
+/* ===== Emoji Contest ===== */
+.emoji-scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 24px;
+}
+
+.emoji-progress {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.emoji-body {
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.emoji-clue {
+  font-size: 3.2rem;
+  line-height: 1.4;
+  text-align: center;
+  letter-spacing: 0.08em;
+}
+
+.emoji-blanks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  row-gap: 12px;
+}
+
+.emoji-blank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 36px;
+  border-bottom: 3px solid var(--accent-pink);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.emoji-blank-space {
+  display: inline-block;
+  width: 16px;
+  height: 36px;
+}
+
+.emoji-blank-correct {
+  border-color: #5ea669;
+  color: #5ea669;
+  animation: blankReveal 0.35s ease-out;
+}
+
+@keyframes blankReveal {
+  0% { transform: scale(0.6); opacity: 0.3; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.emoji-input-area {
+  margin-top: 4px;
+}
+
+.emoji-input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--glass-border);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.emoji-input::placeholder {
+  color: var(--text-muted);
+}
+
+.emoji-input:focus {
+  border-color: var(--accent-pink-light);
+  box-shadow: 0 0 0 3px rgba(232, 135, 156, 0.15);
+}
+
+.emoji-hint {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  min-height: 1.4em;
+  margin-top: -8px;
+}
+
+.emoji-hint-wrong {
+  color: var(--accent-rose);
+}
+
+.emoji-hint-correct {
+  color: #5ea669;
+}
+
 /* ===== Confetti Canvas ===== */
 #confetti-canvas {
   position: fixed;

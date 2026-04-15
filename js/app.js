@@ -28,6 +28,10 @@
     els.flappyTriesLeft = document.getElementById('flappy-tries-left');
     els.flappyBestScore = document.getElementById('flappy-best-score');
 
+    els.emojiBack = document.getElementById('emoji-back');
+    els.emojiCheck = document.getElementById('emoji-check');
+    els.emojiInput = document.getElementById('emoji-input');
+
     els.modalOverlay = document.getElementById('modal-overlay');
     els.btnModalHome = document.getElementById('btn-modal-home');
   }
@@ -66,6 +70,18 @@
       showDashboard();
     });
     els.btnStartGraded.addEventListener('click', handleStartGradedGame);
+    els.emojiBack.addEventListener('click', function () {
+      showDashboard();
+    });
+    els.emojiCheck.addEventListener('click', function () {
+      if (window.EmojiGame) EmojiGame.checkAnswer();
+    });
+    els.emojiInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (window.EmojiGame) EmojiGame.checkAnswer();
+      }
+    });
     els.btnModalHome.addEventListener('click', function () {
       hideModal();
       showDashboard();
@@ -195,6 +211,12 @@
           return;
         }
 
+        if (contest.type === 'emoji') {
+          currentContest = contest;
+          openEmojiContest();
+          return;
+        }
+
         Router.navigate('view-contest');
         loadContest();
       })
@@ -287,6 +309,35 @@
         flappySubmitting = false;
         els.btnStartGraded.disabled = false;
         els.btnStartGraded.textContent = 'Start Graded Game';
+        alert('Something went wrong. Please try again.');
+      });
+  }
+
+  // ==================== Emoji Contest ====================
+  function openEmojiContest() {
+    Router.navigate('view-emoji');
+    if (!window.EmojiGame) {
+      alert('Emoji game failed to load.');
+      showDashboard();
+      return;
+    }
+    EmojiGame.init({ onComplete: handleEmojiComplete });
+  }
+
+  function handleEmojiComplete(totalPoints) {
+    var isAdmin = Auth.isAdmin();
+    if (isAdmin) {
+      showModal('Admin test run. Total: ' + totalPoints + ' pts (no points saved).');
+      return;
+    }
+
+    Store.submitContest(totalPoints)
+      .then(function () {
+        Confetti.launch(3000);
+        showModal('You decoded all 10! +' + totalPoints + ' points added to your total 💖');
+      })
+      .catch(function (err) {
+        console.error('Emoji submit failed:', err);
         alert('Something went wrong. Please try again.');
       });
   }
