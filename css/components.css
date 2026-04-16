@@ -540,6 +540,322 @@
   color: #5ea669;
 }
 
+/* ===== Memory Maze ===== */
+.maze-scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 24px;
+}
+
+.maze-progress-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+}
+
+.maze-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent-pink), var(--accent-lavender));
+  transition: width 0.5s ease;
+}
+
+.maze-stage-indicator {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  align-self: center;
+}
+
+.maze-tier-green  { background: rgba(94, 166, 105, 0.18); color: #3d8b4a; }
+.maze-tier-yellow { background: rgba(220, 180, 60, 0.18); color: #9e8520; }
+.maze-tier-orange { background: rgba(230, 140, 60, 0.18); color: #b06a1a; }
+.maze-tier-blue   { background: rgba(80, 140, 220, 0.18); color: #2e6fad; }
+.maze-tier-purple { background: rgba(160, 100, 200, 0.18); color: #7b4aa0; }
+
+.maze-tries-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.maze-tries-info #maze-tries-left {
+  color: var(--accent-pink);
+  font-size: 1rem;
+}
+
+.maze-earned-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.maze-earned-label #maze-earned {
+  color: var(--accent-pink);
+  font-weight: 700;
+}
+
+.maze-game-area {
+  min-height: 220px;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.maze-elements-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 16px;
+  row-gap: 20px;
+}
+
+.maze-element {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.12s ease;
+}
+
+.maze-element:active {
+  transform: scale(0.92);
+}
+
+.maze-element.maze-no-tap {
+  cursor: default;
+  pointer-events: none;
+}
+
+.maze-emoji {
+  font-size: 3rem;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+.maze-tap-counter {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-height: 1em;
+}
+
+.maze-element-tapped .maze-emoji {
+  animation: mazeTapPulse 0.15s ease;
+}
+
+.maze-element-done {
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.maze-element-done .maze-tap-counter {
+  color: #5ea669;
+}
+
+.maze-element-shaking .maze-emoji {
+  animation: mazeTreeShake 0.5s ease;
+}
+
+.maze-balloon-popping .maze-emoji {
+  animation: mazeBalloonPop 0.3s ease forwards;
+}
+
+.maze-tree-cat-reveal {
+  animation: mazeCatFall 0.5s ease-out;
+}
+
+.maze-fruits-container {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.maze-fruit-item {
+  font-size: 1.6rem;
+  animation: mazeFruitFall 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.maze-instruction {
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  white-space: pre-line;
+  min-height: 1.4em;
+  padding: 0 8px;
+}
+
+.maze-input-area {
+  display: flex;
+  gap: 10px;
+}
+
+.maze-input {
+  flex: 1;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--glass-border);
+  font-size: 1rem;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -moz-appearance: textfield;
+}
+
+.maze-input::-webkit-outer-spin-button,
+.maze-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.maze-input:focus {
+  border-color: var(--accent-pink-light);
+  box-shadow: 0 0 0 3px rgba(232, 135, 156, 0.15);
+}
+
+.maze-input-correct {
+  border-color: #5ea669 !important;
+  box-shadow: 0 0 0 3px rgba(94, 166, 105, 0.2) !important;
+}
+
+.maze-input-btn {
+  padding: 14px 22px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.maze-timer {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent-pink);
+  padding: 10px;
+  transition: color 0.3s ease;
+}
+
+.maze-timer-critical {
+  color: var(--accent-rose);
+  animation: mazeTimerPulse 0.5s ease infinite;
+}
+
+.maze-stage-complete-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(60, 48, 64, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 90;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.maze-stage-complete-overlay[hidden] { display: none; }
+
+.maze-stage-msg {
+  padding: 24px 32px;
+  border-radius: var(--radius-lg);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.5;
+  animation: scaleIn 0.25s ease-out;
+}
+
+.maze-stage-success {
+  background: rgba(255, 255, 255, 0.85);
+  color: #3d8b4a;
+  border: 1px solid rgba(94, 166, 105, 0.3);
+}
+
+.maze-stage-fail {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--accent-rose);
+  border: 1px solid rgba(242, 132, 130, 0.3);
+}
+
+/* Info screen */
+.maze-info-card {
+  text-align: center;
+  padding: 20px;
+  width: 100%;
+}
+
+.maze-info-text {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.8;
+  color: var(--text-primary);
+  white-space: pre-line;
+  margin-bottom: 24px;
+}
+
+.maze-got-it-btn {
+  min-width: 160px;
+}
+
+/* End screen */
+.maze-end-card {
+  text-align: center;
+  padding: 20px;
+  width: 100%;
+}
+
+.maze-end-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.maze-end-title {
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.maze-end-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.maze-end-points {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent-pink);
+  margin-top: 12px;
+}
+
 /* ===== Confetti Canvas ===== */
 #confetti-canvas {
   position: fixed;

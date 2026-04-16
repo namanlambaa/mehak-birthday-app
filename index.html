@@ -149,6 +149,40 @@
     </div>
   </section>
 
+  <!-- ==================== MEMORY MAZE VIEW ==================== -->
+  <section id="view-memory-maze" class="view">
+    <div class="maze-scroll">
+      <button id="maze-back" class="btn-back">← Back</button>
+      <h1 class="contest-title">Memory Maze 🧠</h1>
+
+      <div class="maze-progress-bar">
+        <div id="maze-progress-fill" class="maze-progress-fill"></div>
+      </div>
+
+      <div id="maze-stage-indicator" class="maze-stage-indicator maze-tier-green">
+        Stage 1 / 20
+      </div>
+
+      <div id="maze-tries-info" class="maze-tries-info glass-card">
+        <span><span id="maze-tries-left">10</span> tries remaining</span>
+        <span class="maze-earned-label">Earned: <span id="maze-earned">0</span> pts</span>
+      </div>
+
+      <div id="maze-game-area" class="maze-game-area glass-card"></div>
+
+      <p id="maze-instruction" class="maze-instruction"></p>
+
+      <div id="maze-input-area" class="maze-input-area" hidden>
+        <input type="number" id="maze-input" class="maze-input" placeholder="Enter number..." autocomplete="off" inputmode="numeric" />
+        <button id="maze-input-btn" class="btn btn-primary maze-input-btn">Submit</button>
+      </div>
+
+      <div id="maze-timer" class="maze-timer" hidden>5s</div>
+
+      <div id="maze-stage-complete" class="maze-stage-complete-overlay" hidden></div>
+    </div>
+  </section>
+
   <!-- ==================== SUCCESS MODAL ==================== -->
   <div id="modal-overlay" class="modal-overlay" hidden>
     <div class="modal-card glass-card">
@@ -178,6 +212,7 @@
   <script src="js/confetti.js"></script>
   <script src="js/flappy.js"></script>
   <script src="js/emoji.js"></script>
+  <script src="js/memory-maze.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

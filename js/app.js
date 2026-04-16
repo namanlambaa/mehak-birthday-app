@@ -32,6 +32,10 @@
     els.emojiCheck = document.getElementById('emoji-check');
     els.emojiInput = document.getElementById('emoji-input');
 
+    els.mazeBack = document.getElementById('maze-back');
+    els.mazeTriesLeft = document.getElementById('maze-tries-left');
+    els.mazeEarned = document.getElementById('maze-earned');
+
     els.modalOverlay = document.getElementById('modal-overlay');
     els.btnModalHome = document.getElementById('btn-modal-home');
   }
@@ -73,6 +77,7 @@
     els.emojiBack.addEventListener('click', function () {
       showDashboard();
     });
+    els.mazeBack.addEventListener('click', handleMazeBack);
     els.emojiCheck.addEventListener('click', function () {
       if (window.EmojiGame) EmojiGame.checkAnswer();
     });
@@ -122,6 +127,9 @@
     if (window.FlappyGame) {
       FlappyGame.stop();
     }
+    if (window.MemoryMaze) {
+      MemoryMaze.stop();
+    }
     Router.navigate('view-dashboard');
     loadDashboardData();
   }
@@ -148,11 +156,29 @@
 
         return Store.getCurrentContest().then(function (contest) {
           var isFlappy = contest && contest.type === 'flappy';
+          var isMaze = contest && contest.type === 'memory-maze';
 
           if (isAdmin) {
             els.btnPlay.disabled = false;
             els.playStatus.textContent = '🔧 Admin mode — testing only';
             els.playStatus.hidden = false;
+          } else if (isMaze) {
+            if (Store.isMazeCompleted(data)) {
+              els.btnPlay.disabled = true;
+              els.playStatus.textContent = 'Memory Maze completed! Earned: ' + (data.mazeTotalEarned || 0) + ' pts 💖';
+              els.playStatus.hidden = false;
+            } else {
+              var mazeTriesLeft = Store.getMazeTriesLeft(data);
+              if (mazeTriesLeft <= 0) {
+                els.btnPlay.disabled = true;
+                els.playStatus.textContent = 'All 10 tries used! Earned: ' + (data.mazeTotalEarned || 0) + ' pts 💖';
+                els.playStatus.hidden = false;
+              } else {
+                els.btnPlay.disabled = false;
+                els.playStatus.textContent = mazeTriesLeft + ' tries remaining 🧠';
+                els.playStatus.hidden = false;
+              }
+            }
           } else if (isFlappy) {
             var triesLeft = Store.getFlappyTriesLeft(data);
             if (triesLeft <= 0) {
@@ -214,6 +240,12 @@
         if (contest.type === 'emoji') {
           currentContest = contest;
           openEmojiContest();
+          return;
+        }
+
+        if (contest.type === 'memory-maze') {
+          currentContest = contest;
+          openMazeContest();
           return;
         }
 
@@ -433,6 +465,96 @@
         els.btnSubmit.disabled = false;
         alert('Something went wrong. Please try again.');
       });
+  }
+
+  // ==================== Memory Maze ====================
+  function openMazeContest() {
+    Router.navigate('view-memory-maze');
+
+    if (!window.MemoryMaze) {
+      alert('Memory Maze failed to load.');
+      showDashboard();
+      return;
+    }
+
+    Store.getUserDoc().then(function (data) {
+      var triesLeft = Store.getMazeTriesLeft(data);
+      var earned = data.mazeTotalEarned || 0;
+      els.mazeTriesLeft.textContent = triesLeft;
+      els.mazeEarned.textContent = earned;
+    }).catch(function () {
+      els.mazeTriesLeft.textContent = Store.MAZE_MAX_TRIES;
+      els.mazeEarned.textContent = '0';
+    });
+
+    MemoryMaze.init({
+      onComplete: handleMazeComplete,
+      onFail: handleMazeFail
+    });
+  }
+
+  function handleMazeComplete(totalPoints) {
+    var isAdmin = Auth.isAdmin();
+    if (isAdmin) {
+      showModal('Admin test run. Total: ' + totalPoints + ' pts (no points saved).');
+      return;
+    }
+
+    Store.submitMazeTry(totalPoints, true)
+      .then(function (result) {
+        Confetti.launch(4000);
+        els.mazeTriesLeft.textContent = result.triesLeft;
+        els.mazeEarned.textContent = result.totalEarned;
+        showModal('You completed the Memory Maze! +' + totalPoints + ' points added to your total 💖');
+      })
+      .catch(function (err) {
+        console.error('Maze complete submit failed:', err);
+        alert('Something went wrong. Please try again.');
+      });
+  }
+
+  function handleMazeFail(stageReached, pointsThisRun) {
+    var isAdmin = Auth.isAdmin();
+    if (isAdmin) {
+      showModal('Admin test — reached stage ' + (stageReached + 1) + '. Points: ' + pointsThisRun + ' (not saved).');
+      return;
+    }
+
+    Store.submitMazeTry(pointsThisRun, false)
+      .then(function (result) {
+        els.mazeTriesLeft.textContent = result.triesLeft;
+        els.mazeEarned.textContent = result.totalEarned;
+
+        var msg;
+        if (result.triesLeft <= 0) {
+          if (result.pointsAdded > 0) {
+            msg = 'Last try! +' + result.pointsAdded + ' pts from your best run added. Total earned: ' + result.totalEarned + ' pts.';
+          } else {
+            msg = 'All 10 tries used. Total earned: ' + result.totalEarned + ' pts.';
+          }
+        } else {
+          msg = 'Reached stage ' + (stageReached + 1) + '. ' + result.triesLeft + ' tries left — no points until you finish all 20 stages!';
+        }
+        showModal(msg);
+      })
+      .catch(function (err) {
+        console.error('Maze fail submit failed:', err);
+        alert('Something went wrong. Please try again.');
+      });
+  }
+
+  function handleMazeBack() {
+    if (window.MemoryMaze) {
+      var stage = MemoryMaze.getCurrentStage();
+      if (stage > 0) {
+        var pts = MemoryMaze.getPointsSoFar();
+        MemoryMaze.stop();
+        handleMazeFail(stage, pts);
+        return;
+      }
+      MemoryMaze.stop();
+    }
+    showDashboard();
   }
 
   // ==================== Modal ====================

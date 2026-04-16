@@ -99,6 +99,45 @@
   80% { transform: translateX(4px); }
 }
 
+/* ===== Memory Maze animations ===== */
+@keyframes mazeTapPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+@keyframes mazeTreeShake {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-12deg); }
+  30% { transform: rotate(10deg); }
+  45% { transform: rotate(-8deg); }
+  60% { transform: rotate(6deg); }
+  75% { transform: rotate(-3deg); }
+}
+
+@keyframes mazeFruitFall {
+  0% { opacity: 1; transform: translateY(-20px) scale(1); }
+  70% { opacity: 1; transform: translateY(60px) scale(0.9); }
+  100% { opacity: 0; transform: translateY(90px) scale(0.7); }
+}
+
+@keyframes mazeCatFall {
+  0% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+  60% { opacity: 1; transform: translateY(6px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes mazeBalloonPop {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.7; }
+  100% { transform: scale(0.3); opacity: 0; }
+}
+
+@keyframes mazeTimerPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
 /* ===== Pixel-style hearts using SVG inline ===== */
 .hearts-bg {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 50 L15 35 Q5 25 15 15 Q25 10 30 20 Q35 10 45 15 Q55 25 45 35 Z' fill='rgba(232,135,156,0.045)' /%3E%3C/svg%3E");
