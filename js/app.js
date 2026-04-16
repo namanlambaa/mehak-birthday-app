@@ -171,7 +171,7 @@
               var mazeTriesLeft = Store.getMazeTriesLeft(data);
               if (mazeTriesLeft <= 0) {
                 els.btnPlay.disabled = true;
-                els.playStatus.textContent = 'All 10 tries used! Earned: ' + (data.mazeTotalEarned || 0) + ' pts 💖';
+                els.playStatus.textContent = 'All 3 tries used! Earned: ' + (data.mazeTotalEarned || 0) + ' pts 💖';
                 els.playStatus.hidden = false;
               } else {
                 els.btnPlay.disabled = false;
@@ -530,7 +530,7 @@
           if (result.pointsAdded > 0) {
             msg = 'Last try! +' + result.pointsAdded + ' pts from your best run added. Total earned: ' + result.totalEarned + ' pts.';
           } else {
-            msg = 'All 10 tries used. Total earned: ' + result.totalEarned + ' pts.';
+            msg = 'All 3 tries used. Total earned: ' + result.totalEarned + ' pts.';
           }
         } else {
           msg = 'Reached stage ' + (stageReached + 1) + '. ' + result.triesLeft + ' tries left — no points until you finish all 20 stages!';

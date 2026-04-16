@@ -71,7 +71,7 @@ window.Store = (function () {
     });
   }
 
-  var MAZE_MAX_TRIES = 10;
+  var MAZE_MAX_TRIES = 3;
 
   function getMazeTriesLeft(userData) {
     var used = userData.mazeTriesUsed || 0;
