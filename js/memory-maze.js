@@ -36,7 +36,7 @@ window.MemoryMaze = (function () {
       // STAGE 2: 4 cats, tap each 3x
       {
         elements: [{ type: 'cat', count: 4 }],
-        instruction: 'Tap each cat 3 times',
+        instruction: 'Tap each cat',
         hasInput: false,
         tierColor: 'green'
       },
@@ -60,7 +60,7 @@ window.MemoryMaze = (function () {
       // STAGE 5: 5 balls -> enter 56
       {
         elements: [{ type: 'ball', count: 5 }],
-        instruction: 'Count the balls and enter the correct number',
+        instruction: 'Enter the number',
         hasInput: true,
         correctAnswer: '56',
         tierColor: 'green'
@@ -68,7 +68,7 @@ window.MemoryMaze = (function () {
       // STAGE 6: 1 cat + 4 balls
       {
         elements: [{ type: 'cat', count: 1 }, { type: 'ball', count: 4 }],
-        instruction: 'Tap the cat 3 times, then enter the number for the balls',
+        instruction: 'Tap the cat, then enter the number',
         hasInput: true,
         correctAnswer: '45',
         tierColor: 'yellow'
@@ -76,7 +76,7 @@ window.MemoryMaze = (function () {
       // STAGE 7: tree + cat + 3 balls
       {
         elements: [{ type: 'tree', count: 1 }, { type: 'cat', count: 1 }, { type: 'ball', count: 3 }],
-        instruction: 'Shake the tree, tap the cat, and enter the number for balls',
+        instruction: 'Shake the tree, tap the cat, and enter the number',
         hasInput: true,
         correctAnswer: '56',
         tierColor: 'yellow',
@@ -93,7 +93,7 @@ window.MemoryMaze = (function () {
       // STAGE 9: cat + dog
       {
         elements: [{ type: 'cat', count: 1 }, { type: 'dog', count: 1 }],
-        instruction: 'Cat needs 3 taps, dog needs 2 taps',
+        instruction: 'Tap the animals',
         hasInput: false,
         tierColor: 'yellow'
       },
@@ -108,7 +108,7 @@ window.MemoryMaze = (function () {
       // STAGE 11: rule screen — cat=3, dog=2
       {
         elements: [],
-        instruction: 'Remember the rules!\n🐱 Cat = 3 taps\n🐶 Dog = 2 taps\n\nTap "Got it!" to continue',
+        instruction: 'No hints now.\n\nTap \"Got it!\" to continue',
         hasInput: false,
         tierColor: 'orange',
         isInfoScreen: true
@@ -116,7 +116,7 @@ window.MemoryMaze = (function () {
       // STAGE 12: cat + dog + cat -> enter total taps = 8
       {
         elements: [{ type: 'cat', count: 1 }, { type: 'dog', count: 1 }, { type: 'cat', count: 1 }],
-        instruction: 'How many total taps are needed for all the animals above?',
+        instruction: 'Enter the total taps needed for all the animals above',
         hasInput: true,
         correctAnswer: '8',
         tierColor: 'orange',
@@ -133,14 +133,14 @@ window.MemoryMaze = (function () {
       // STAGE 14: balloon + cat + dog
       {
         elements: [{ type: 'balloon', count: 1 }, { type: 'cat', count: 1 }, { type: 'dog', count: 1 }],
-        instruction: 'Pop the balloon, tap the cat 3 times, tap the dog 2 times',
+        instruction: 'Pop the balloon, then tap the animals',
         hasInput: false,
         tierColor: 'orange'
       },
       // STAGE 15: tree + balloon + 6 balls
       {
         elements: [{ type: 'tree', count: 1 }, { type: 'balloon', count: 1 }, { type: 'ball', count: 6 }],
-        instruction: 'Shake the tree, pop the balloon, and enter the number for balls',
+        instruction: 'Shake the tree, pop the balloon, and enter the number',
         hasInput: true,
         correctAnswer: '45',
         tierColor: 'blue',
@@ -157,7 +157,7 @@ window.MemoryMaze = (function () {
       // STAGE 17: reverse rule screen
       {
         elements: [],
-        instruction: 'TWIST! Rules are now reversed!\n🐱 Cat = 2 taps\n🐶 Dog = 3 taps\n\nTap "Got it!" to continue',
+        instruction: 'TWIST! Rules are now reversed!\n🐱 Cat = 2 taps\n🐶 Dog = 3 taps\n\nTap \"Got it!\" to continue',
         hasInput: false,
         tierColor: 'blue',
         isInfoScreen: true,
@@ -166,7 +166,7 @@ window.MemoryMaze = (function () {
       // STAGE 18: cat + dog + 5 balls (reversed)
       {
         elements: [{ type: 'cat', count: 1 }, { type: 'dog', count: 1 }, { type: 'ball', count: 5 }],
-        instruction: 'Remember: rules are reversed! Enter the number for balls',
+        instruction: 'Tap the animals and enter the number',
         hasInput: true,
         correctAnswer: '56',
         tierColor: 'blue'
@@ -180,7 +180,7 @@ window.MemoryMaze = (function () {
           { type: 'balloon', count: 1 },
           { type: 'ball', count: 4 }
         ],
-        instruction: 'FINAL MIX! Shake tree, tap animals, pop balloons, enter ball number',
+        instruction: 'FINAL MIX!',
         hasInput: true,
         correctAnswer: '45',
         tierColor: 'purple',
