@@ -36,7 +36,7 @@ window.MemoryMaze = (function () {
       // STAGE 2: 4 cats, tap each 3x
       {
         elements: [{ type: 'cat', count: 4 }],
-        instruction: 'Tap each cat',
+        instruction: '',
         hasInput: false,
         tierColor: 'green'
       },
@@ -60,7 +60,7 @@ window.MemoryMaze = (function () {
       // STAGE 5: 5 balls -> enter 56
       {
         elements: [{ type: 'ball', count: 5 }],
-        instruction: 'Enter the number',
+        instruction: '',
         hasInput: true,
         correctAnswer: '56',
         tierColor: 'green'
@@ -68,7 +68,7 @@ window.MemoryMaze = (function () {
       // STAGE 6: 1 cat + 4 balls
       {
         elements: [{ type: 'cat', count: 1 }, { type: 'ball', count: 4 }],
-        instruction: 'Tap the cat, then enter the number',
+        instruction: '',
         hasInput: true,
         correctAnswer: '45',
         tierColor: 'yellow'
@@ -76,7 +76,7 @@ window.MemoryMaze = (function () {
       // STAGE 7: tree + cat + 3 balls
       {
         elements: [{ type: 'tree', count: 1 }, { type: 'cat', count: 1 }, { type: 'ball', count: 3 }],
-        instruction: 'Shake the tree, tap the cat, and enter the number',
+        instruction: '',
         hasInput: true,
         correctAnswer: '56',
         tierColor: 'yellow',
@@ -93,14 +93,14 @@ window.MemoryMaze = (function () {
       // STAGE 9: cat + dog
       {
         elements: [{ type: 'cat', count: 1 }, { type: 'dog', count: 1 }],
-        instruction: 'Tap the animals',
+        instruction: '',
         hasInput: false,
         tierColor: 'yellow'
       },
       // STAGE 10: tree + dog -> shake -> cat falls
       {
         elements: [{ type: 'tree', count: 1 }, { type: 'dog', count: 1 }],
-        instruction: 'Shake the tree, tap the dog, and don\'t forget what falls!',
+        instruction: '',
         hasInput: false,
         tierColor: 'yellow',
         hasTreeCat: true
@@ -108,7 +108,7 @@ window.MemoryMaze = (function () {
       // STAGE 11: rule screen — cat=3, dog=2
       {
         elements: [],
-        instruction: 'No hints now.\n\nTap \"Got it!\" to continue',
+        instruction: '',
         hasInput: false,
         tierColor: 'orange',
         isInfoScreen: true
@@ -133,14 +133,14 @@ window.MemoryMaze = (function () {
       // STAGE 14: balloon + cat + dog
       {
         elements: [{ type: 'balloon', count: 1 }, { type: 'cat', count: 1 }, { type: 'dog', count: 1 }],
-        instruction: 'Pop the balloon, then tap the animals',
+        instruction: '',
         hasInput: false,
         tierColor: 'orange'
       },
       // STAGE 15: tree + balloon + 6 balls
       {
         elements: [{ type: 'tree', count: 1 }, { type: 'balloon', count: 1 }, { type: 'ball', count: 6 }],
-        instruction: 'Shake the tree, pop the balloon, and enter the number',
+        instruction: '',
         hasInput: true,
         correctAnswer: '45',
         tierColor: 'blue',
@@ -166,7 +166,7 @@ window.MemoryMaze = (function () {
       // STAGE 18: cat + dog + 5 balls (reversed)
       {
         elements: [{ type: 'cat', count: 1 }, { type: 'dog', count: 1 }, { type: 'ball', count: 5 }],
-        instruction: 'Tap the animals and enter the number',
+        instruction: '',
         hasInput: true,
         correctAnswer: '56',
         tierColor: 'blue'
@@ -180,7 +180,7 @@ window.MemoryMaze = (function () {
           { type: 'balloon', count: 1 },
           { type: 'ball', count: 4 }
         ],
-        instruction: 'FINAL MIX!',
+        instruction: '',
         hasInput: true,
         correctAnswer: '45',
         tierColor: 'purple',
@@ -295,8 +295,13 @@ window.MemoryMaze = (function () {
 
     renderElements(stage);
 
-    instructionEl.textContent = stage.instruction;
-    instructionEl.hidden = false;
+    if (stage.instruction) {
+      instructionEl.textContent = stage.instruction;
+      instructionEl.hidden = false;
+    } else {
+      instructionEl.textContent = '';
+      instructionEl.hidden = true;
+    }
 
     if (stage.hasInput) {
       inputArea.hidden = false;
@@ -679,9 +684,12 @@ window.MemoryMaze = (function () {
     var card = document.createElement('div');
     card.className = 'maze-info-card';
 
-    var text = document.createElement('p');
-    text.className = 'maze-info-text';
-    text.textContent = stage.instruction;
+    if (stage.instruction) {
+      var text = document.createElement('p');
+      text.className = 'maze-info-text';
+      text.textContent = stage.instruction;
+      card.appendChild(text);
+    }
 
     var btn = document.createElement('button');
     btn.className = 'btn btn-primary maze-got-it-btn';
@@ -692,7 +700,6 @@ window.MemoryMaze = (function () {
       advanceStage();
     });
 
-    card.appendChild(text);
     card.appendChild(btn);
     gameArea.appendChild(card);
   }
