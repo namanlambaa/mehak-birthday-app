@@ -654,13 +654,6 @@
   transition: transform 0.15s ease;
 }
 
-.maze-tap-counter {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  min-height: 1em;
-}
-
 .maze-element-tapped .maze-emoji {
   animation: mazeTapPulse 0.15s ease;
 }
@@ -668,10 +661,6 @@
 .maze-element-done {
   pointer-events: none;
   opacity: 0.55;
-}
-
-.maze-element-done .maze-tap-counter {
-  color: #5ea669;
 }
 
 .maze-element-shaking .maze-emoji {

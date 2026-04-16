@@ -335,57 +335,43 @@ window.MemoryMaze = (function () {
     var emojiSpan = document.createElement('span');
     emojiSpan.className = 'maze-emoji';
 
-    var counterSpan = document.createElement('span');
-    counterSpan.className = 'maze-tap-counter';
-    counterSpan.setAttribute('data-counter-for', id);
-
     switch (type) {
       case 'cat':
         emojiSpan.textContent = '🐱';
-        var needed = catTapsRequired;
         if (stage.noTapRequired) {
-          counterSpan.textContent = '';
           wrapper.classList.add('maze-no-tap');
         } else {
-          counterSpan.textContent = '0/' + needed;
-          bindTapHandler(wrapper, id, needed, stage);
+          bindTapHandler(wrapper, id, catTapsRequired, stage);
         }
         break;
 
       case 'dog':
         emojiSpan.textContent = '🐶';
-        var needed = dogTapsRequired;
         if (stage.noTapRequired) {
-          counterSpan.textContent = '';
           wrapper.classList.add('maze-no-tap');
         } else {
-          counterSpan.textContent = '0/' + needed;
-          bindTapHandler(wrapper, id, needed, stage);
+          bindTapHandler(wrapper, id, dogTapsRequired, stage);
         }
         break;
 
       case 'tree':
         emojiSpan.textContent = '🌳';
-        counterSpan.textContent = 'double tap';
         bindTreeHandler(wrapper, id, stage);
         break;
 
       case 'ball':
         emojiSpan.textContent = '⚽';
-        counterSpan.textContent = '';
         wrapper.classList.add('maze-no-tap');
         break;
 
       case 'balloon':
         emojiSpan.textContent = '🎈';
-        counterSpan.textContent = 'tap to pop';
         stageState.balloonsTotal++;
         bindBalloonHandler(wrapper, id, stage);
         break;
     }
 
     wrapper.appendChild(emojiSpan);
-    wrapper.appendChild(counterSpan);
     return wrapper;
   }
 
@@ -398,9 +384,6 @@ window.MemoryMaze = (function () {
 
       stageState.tapCounts[id]++;
       var count = stageState.tapCounts[id];
-
-      var counter = el.querySelector('.maze-tap-counter');
-      if (counter) counter.textContent = count + '/' + needed;
 
       el.classList.add('maze-element-tapped');
       setTimeout(function () { el.classList.remove('maze-element-tapped'); }, 150);
@@ -422,9 +405,6 @@ window.MemoryMaze = (function () {
       if (now - lastTap < 400) {
         stageState.treeShaken = true;
         el.classList.add('maze-element-shaking');
-
-        var counter = el.querySelector('.maze-tap-counter');
-        if (counter) counter.textContent = 'shaken!';
 
         setTimeout(function () {
           el.classList.remove('maze-element-shaking');
@@ -479,13 +459,7 @@ window.MemoryMaze = (function () {
     emojiSpan.className = 'maze-emoji';
     emojiSpan.textContent = '🐱';
 
-    var counterSpan = document.createElement('span');
-    counterSpan.className = 'maze-tap-counter';
-    counterSpan.setAttribute('data-counter-for', catId);
-    counterSpan.textContent = '0/' + catTapsRequired;
-
     catWrapper.appendChild(emojiSpan);
-    catWrapper.appendChild(counterSpan);
     catWrapper.setAttribute('data-id', catId);
     catWrapper.setAttribute('data-type', 'cat');
 
@@ -495,7 +469,6 @@ window.MemoryMaze = (function () {
 
       stageState.treeCatTaps++;
       var count = stageState.treeCatTaps;
-      counterSpan.textContent = count + '/' + catTapsRequired;
 
       catWrapper.classList.add('maze-element-tapped');
       setTimeout(function () { catWrapper.classList.remove('maze-element-tapped'); }, 150);
@@ -522,9 +495,6 @@ window.MemoryMaze = (function () {
 
       el.classList.add('maze-balloon-popping');
       stageState.balloonsPoppedCount++;
-
-      var counter = el.querySelector('.maze-tap-counter');
-      if (counter) counter.textContent = 'popped!';
 
       setTimeout(function () {
         el.classList.add('maze-element-done');
