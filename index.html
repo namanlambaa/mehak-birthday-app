@@ -183,6 +183,34 @@
     </div>
   </section>
 
+  <!-- ==================== BRICK BREAKER VIEW ==================== -->
+  <section id="view-brickbreaker" class="view">
+    <div class="bb-wrap">
+      <button id="bb-back" class="btn-back">← Back</button>
+      <h1 class="contest-title">Today's Brick Breaker 🧱</h1>
+
+      <div id="bb-stage" class="bb-stage glass-card">
+        <canvas id="bb-canvas" aria-label="Brick breaker game area"></canvas>
+
+        <div class="bb-hud">
+          <div class="bb-chip">Level: <span id="bb-level">1</span>/5</div>
+          <div class="bb-chip">Score: <span id="bb-score">0</span> pts</div>
+          <div class="bb-chip">Lives: <span id="bb-lives">3</span></div>
+        </div>
+
+        <div id="bb-overlay" class="bb-overlay"></div>
+      </div>
+
+      <div class="bb-actions">
+        <button id="bb-start" class="btn btn-primary btn-full">Start</button>
+        <button id="bb-retry" class="btn btn-ghost btn-full">Retry Level</button>
+        <button id="bb-claim" class="btn btn-primary btn-full">End Run &amp; Claim Points</button>
+      </div>
+
+      <p id="bb-status" class="play-status" hidden></p>
+    </div>
+  </section>
+
   <!-- ==================== SUCCESS MODAL ==================== -->
   <div id="modal-overlay" class="modal-overlay" hidden>
     <div class="modal-card glass-card">
@@ -211,6 +239,7 @@
   <script src="js/firestore.js"></script>
   <script src="js/confetti.js"></script>
   <script src="js/flappy.js"></script>
+  <script src="js/brickbreaker.js"></script>
   <script src="js/emoji.js"></script>
   <script src="js/memory-maze.js"></script>
   <script src="js/app.js"></script>

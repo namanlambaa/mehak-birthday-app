@@ -4,6 +4,7 @@
   var currentContest = null;
   var userData = null;
   var flappySubmitting = false;
+  var brickbreakerSubmitting = false;
 
   function cacheDom() {
     els.loginForm = document.getElementById('login-form');
@@ -35,6 +36,12 @@
     els.mazeBack = document.getElementById('maze-back');
     els.mazeTriesLeft = document.getElementById('maze-tries-left');
     els.mazeEarned = document.getElementById('maze-earned');
+
+    els.bbBack = document.getElementById('bb-back');
+    els.bbStart = document.getElementById('bb-start');
+    els.bbRetry = document.getElementById('bb-retry');
+    els.bbClaim = document.getElementById('bb-claim');
+    els.bbStatus = document.getElementById('bb-status');
 
     els.modalOverlay = document.getElementById('modal-overlay');
     els.btnModalHome = document.getElementById('btn-modal-home');
@@ -78,6 +85,12 @@
       showDashboard();
     });
     els.mazeBack.addEventListener('click', handleMazeBack);
+    els.bbBack.addEventListener('click', function () {
+      if (window.BrickBreakerGame) {
+        BrickBreakerGame.stop();
+      }
+      showDashboard();
+    });
     els.emojiCheck.addEventListener('click', function () {
       if (window.EmojiGame) EmojiGame.checkAnswer();
     });
@@ -91,6 +104,22 @@
       hideModal();
       showDashboard();
     });
+
+    if (els.bbStart) {
+      els.bbStart.addEventListener('click', function () {
+        if (window.BrickBreakerGame) BrickBreakerGame.start();
+      });
+    }
+    if (els.bbRetry) {
+      els.bbRetry.addEventListener('click', function () {
+        if (window.BrickBreakerGame) BrickBreakerGame.retryLevel();
+      });
+    }
+    if (els.bbClaim) {
+      els.bbClaim.addEventListener('click', function () {
+        if (window.BrickBreakerGame) BrickBreakerGame.endRun();
+      });
+    }
   }
 
   // ==================== Login ====================
@@ -224,6 +253,15 @@
     els.btnPlay.disabled = true;
     Store.getCurrentContest()
       .then(function (contest) {
+        // Admin-only URL override: ?contest=<type> lets us force-test a contest type locally.
+        if (Auth.isAdmin()) {
+          try {
+            var override = new URLSearchParams(window.location.search).get('contest');
+            if (override) {
+              contest = Object.assign({}, contest || {}, { type: override });
+            }
+          } catch (e) { /* ignore */ }
+        }
         if (!contest) {
           els.btnPlay.disabled = false;
           els.playStatus.textContent = 'No contest available today. Check back later!';
@@ -246,6 +284,12 @@
         if (contest.type === 'memory-maze') {
           currentContest = contest;
           openMazeContest();
+          return;
+        }
+
+        if (contest.type === 'brickbreaker') {
+          currentContest = contest;
+          openBrickBreakerContest();
           return;
         }
 
@@ -555,6 +599,82 @@
       MemoryMaze.stop();
     }
     showDashboard();
+  }
+
+  // ==================== Brick Breaker ====================
+  function openBrickBreakerContest() {
+    Router.navigate('view-brickbreaker');
+    brickbreakerSubmitting = false;
+
+    if (!window.BrickBreakerGame) {
+      alert('Brick Breaker failed to load.');
+      showDashboard();
+      return;
+    }
+
+    if (els.bbStatus) {
+      els.bbStatus.hidden = true;
+      els.bbStatus.textContent = '';
+    }
+
+    // If already played today (non-admin), show locked state.
+    Store.getUserDoc().then(function (data) {
+      if (!Auth.isAdmin() && Store.hasPlayedToday(data)) {
+        if (els.bbStatus) {
+          els.bbStatus.hidden = false;
+          els.bbStatus.textContent = "You've already claimed points today. Come back tomorrow 💫";
+        }
+        if (els.bbStart) els.bbStart.disabled = true;
+        if (els.bbRetry) els.bbRetry.disabled = true;
+        if (els.bbClaim) els.bbClaim.disabled = true;
+      } else {
+        if (els.bbStart) els.bbStart.disabled = false;
+        if (els.bbRetry) els.bbRetry.disabled = false;
+        if (els.bbClaim) els.bbClaim.disabled = false;
+      }
+
+      BrickBreakerGame.init({
+        onClaimPoints: handleBrickBreakerClaim
+      });
+    }).catch(function () {
+      BrickBreakerGame.init({
+        onClaimPoints: handleBrickBreakerClaim
+      });
+    });
+  }
+
+  function handleBrickBreakerClaim(pointsBanked) {
+    if (brickbreakerSubmitting) return;
+    brickbreakerSubmitting = true;
+
+    var isAdmin = Auth.isAdmin();
+    if (isAdmin) {
+      brickbreakerSubmitting = false;
+      showModal('Admin test run. Banked: ' + pointsBanked + ' pts (no points saved).');
+      return;
+    }
+
+    // Double-check user hasn't already claimed today
+    Store.getUserDoc()
+      .then(function (freshData) {
+        if (Store.hasPlayedToday(freshData)) {
+          brickbreakerSubmitting = false;
+          showModal("You've already claimed today! Points were already counted. 💖");
+          return;
+        }
+
+        return Store.submitContest(pointsBanked || 0).then(function () {
+          brickbreakerSubmitting = false;
+          if (window.BrickBreakerGame) BrickBreakerGame.stop();
+          Confetti.launch(3500);
+          showModal('+' + (pointsBanked || 0) + ' points added to your total 💖');
+        });
+      })
+      .catch(function (err) {
+        console.error('Brick Breaker claim failed:', err);
+        brickbreakerSubmitting = false;
+        alert('Something went wrong. Please try again.');
+      });
   }
 
   // ==================== Modal ====================

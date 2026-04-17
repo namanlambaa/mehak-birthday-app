@@ -854,3 +854,114 @@
   pointer-events: none;
   z-index: 200;
 }
+
+/* ===== Brick Breaker ===== */
+.bb-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 16px;
+}
+
+.bb-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  min-height: 520px;
+  background: linear-gradient(180deg, #fde2e4 0%, #e7d6ef 100%);
+}
+
+#bb-canvas {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border-radius: var(--radius-lg);
+  touch-action: none;
+}
+
+.bb-hud {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.bb-chip {
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  background: var(--glass-bg-heavy, rgba(255,255,255,0.75));
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.bb-chip span {
+  color: var(--accent-pink);
+}
+
+.bb-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.bb-overlay.bb-overlay-visible {
+  opacity: 1;
+}
+
+.bb-overlay-card {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  text-align: center;
+  max-width: 280px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+  animation: scaleIn 0.25s ease-out;
+}
+
+.bb-overlay-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--accent-pink);
+}
+
+.bb-overlay-card p {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 4px 0;
+}
+
+.bb-overlay-sub {
+  margin-top: 10px !important;
+  font-size: 0.75rem !important;
+  color: var(--text-secondary);
+}
+
+.bb-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bb-actions .btn-ghost {
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.55);
+}
