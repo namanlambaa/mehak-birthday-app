@@ -35,10 +35,8 @@
     running: false,
     paused: false,
     level: 0,           // 0-indexed
-    lives: 3,
-    banked: 0,          // points already locked in (completed levels sum)
+    banked: 0,          // total BB points lifetime (from Firestore) + this session
     levelCleared: false,
-    gameOver: false,
     victory: false,
     paddle: null,
     balls: [],
@@ -54,9 +52,9 @@
     shakeMs: 0,
     speedMul: 1.0,      // grows with time/bricks
     bricksBroken: 0,
-    onClaim: null,
+    onLevelCleared: null,
+    onAllDone: null,
     pointerX: null,
-    submitted: false,
     startedOnce: false
   };
 
@@ -70,25 +68,50 @@
     refs.lives = document.getElementById('bb-lives');
     refs.start = document.getElementById('bb-start');
     refs.retry = document.getElementById('bb-retry');
-    refs.claim = document.getElementById('bb-claim');
 
     if (!refs.canvas || !refs.stage || !refs.overlay) return;
 
     ctx = refs.canvas.getContext('2d');
     if (!ctx) return;
 
-    state.onClaim = options && typeof options.onClaimPoints === 'function' ? options.onClaimPoints : null;
+    var opts = options || {};
+    state.onLevelCleared = typeof opts.onLevelCleared === 'function' ? opts.onLevelCleared : null;
+    state.onAllDone = typeof opts.onAllDone === 'function' ? opts.onAllDone : null;
+
+    var startLevel = Math.max(0, Math.min(TOTAL_LEVELS - 1, opts.startLevel || 0));
+    var initialBanked = opts.initialBanked || 0;
+    var alreadyCompleted = !!opts.alreadyCompleted;
 
     resizeCanvas();
     if (!isBound) bindEvents();
 
     isReady = true;
-    resetToLevelStart(0, true);
+    resetToLevelStart(startLevel, true, initialBanked);
+    state.startedOnce = false;
+    state.victory = alreadyCompleted;
     renderHud();
+
+    if (alreadyCompleted) {
+      showOverlay(
+        '<div class="bb-overlay-card">' +
+          '<div class="bb-overlay-title">Already Conquered 🏆</div>' +
+          '<p>You’ve cleared all 5 levels.</p>' +
+          '<p><strong>' + state.banked + ' pts</strong> already earned.</p>' +
+        '</div>'
+      );
+      if (refs.start) refs.start.disabled = true;
+      if (refs.retry) refs.retry.disabled = true;
+      return;
+    }
+
+    var resumeMsg = startLevel > 0
+      ? ('<p>Welcome back! Resuming at <strong>Level ' + (startLevel + 1) + '</strong>.</p>')
+      : '<p>Clear all breakable Mehaks.</p>';
+
     showOverlay(
       '<div class="bb-overlay-card">' +
         '<div class="bb-overlay-title">Brick Breaker 🧱</div>' +
-        '<p>Clear all breakable Mehaks.</p>' +
+        resumeMsg +
         '<p>Levels 1–4: +84 pts each. Level 5: +500 pts.</p>' +
         '<p class="bb-overlay-sub">Tap <strong>Start</strong> to play.</p>' +
       '</div>'
@@ -177,9 +200,7 @@
 
   function start() {
     if (!isReady) return;
-    if (state.gameOver || state.victory) {
-      resetToLevelStart(0, true);
-    }
+    if (state.victory) return;
     state.running = true;
     state.paused = false;
     state.startedOnce = true;
@@ -205,23 +226,6 @@
     rafId = window.requestAnimationFrame(loop);
   }
 
-  function endRun() {
-    if (!isReady) return;
-    if (state.submitted) return;
-    state.submitted = true;
-    state.running = false;
-    cancelFrame();
-    showOverlay(
-      '<div class="bb-overlay-card">' +
-        '<div class="bb-overlay-title">Claiming…</div>' +
-        '<p>Banked ' + state.banked + ' pts</p>' +
-      '</div>'
-    );
-    if (typeof state.onClaim === 'function') {
-      state.onClaim(state.banked);
-    }
-  }
-
   function stop() {
     state.running = false;
     cancelFrame();
@@ -235,14 +239,13 @@
   }
 
   // ==================== Level setup ====================
-  function resetToLevelStart(levelIdx, fullReset) {
+  function resetToLevelStart(levelIdx, fullReset, initialBanked) {
     state.level = levelIdx;
     if (fullReset) {
-      state.banked = 0;
-      state.lives = 3;
-      state.gameOver = false;
+      if (typeof initialBanked === 'number') {
+        state.banked = initialBanked;
+      }
       state.victory = false;
-      state.submitted = false;
     }
     state.levelCleared = false;
     state.balls = [];
@@ -401,7 +404,7 @@
     update(dt);
     render();
 
-    if (state.gameOver || state.victory || state.levelCleared) {
+    if (state.victory || state.levelCleared) {
       handleEndOfRoundFlow();
       return;
     }
@@ -480,14 +483,9 @@
     }
 
     if (state.balls.length === 0) {
-      state.lives -= 1;
-      renderHud();
-      if (state.lives <= 0) {
-        state.gameOver = true;
-      } else {
-        // respawn one ball
-        state.balls.push(makeBall(cfg.baseSpeed));
-      }
+      // Unlimited lives — the challenge is clearing the level, not surviving.
+      state.balls.push(makeBall(cfg.baseSpeed));
+      launchStuckBalls();
     }
 
     // Power-ups falling
@@ -635,53 +633,54 @@
 
   // ==================== End of round flow ====================
   function handleEndOfRoundFlow() {
-    if (state.levelCleared) {
-      state.banked += LEVEL_POINTS[state.level];
-      renderHud();
-      state.running = false;
-      cancelFrame();
+    if (!state.levelCleared) return;
 
-      if (state.level >= TOTAL_LEVELS - 1) {
-        state.victory = true;
-        showOverlay(
-          '<div class="bb-overlay-card">' +
-            '<div class="bb-overlay-title">VICTORY! 🏆</div>' +
-            '<p>You beat all 5 levels.</p>' +
-            '<p><strong>Total: ' + state.banked + ' pts</strong></p>' +
-            '<p class="bb-overlay-sub">Tap <em>End Run &amp; Claim Points</em>.</p>' +
-          '</div>'
-        );
-      } else {
-        var nextLevel = state.level + 1;
-        showOverlay(
-          '<div class="bb-overlay-card">' +
-            '<div class="bb-overlay-title">Level ' + (state.level + 1) + ' Cleared!</div>' +
-            '<p>+' + LEVEL_POINTS[state.level] + ' pts</p>' +
-            '<p class="bb-overlay-sub">Next up: Level ' + (nextLevel + 1) + '</p>' +
-          '</div>'
-        );
-        setTimeout(function () {
-          resetToLevelStart(nextLevel, false);
-          clearOverlay();
-          state.running = true;
-          state.lastTs = 0;
-          cancelFrame();
-          rafId = window.requestAnimationFrame(loop);
-        }, 1200);
-      }
-      return;
+    var clearedIndex = state.level;
+    var pts = LEVEL_POINTS[clearedIndex];
+    state.banked += pts;
+    renderHud();
+    state.running = false;
+    cancelFrame();
+
+    // Notify app so it can persist progress to Firestore.
+    // Credit is only actually written if this is a "new" clear (handled in Store).
+    if (typeof state.onLevelCleared === 'function') {
+      state.onLevelCleared(clearedIndex, pts);
     }
 
-    if (state.gameOver) {
-      state.running = false;
-      cancelFrame();
+    if (clearedIndex >= TOTAL_LEVELS - 1) {
+      state.victory = true;
       showOverlay(
         '<div class="bb-overlay-card">' +
-          '<div class="bb-overlay-title">Out of lives</div>' +
-          '<p>Banked so far: <strong>' + state.banked + '</strong> pts</p>' +
-          '<p class="bb-overlay-sub">Tap <em>Retry Level</em> for unlimited retries, or <em>Claim</em> to bank.</p>' +
+          '<div class="bb-overlay-title">VICTORY! 🏆</div>' +
+          '<p>You beat all 5 levels.</p>' +
+          '<p><strong>Total: ' + state.banked + ' pts</strong></p>' +
+          '<p class="bb-overlay-sub">All your points are saved.</p>' +
         '</div>'
       );
+      if (refs.start) refs.start.disabled = true;
+      if (refs.retry) refs.retry.disabled = true;
+      if (typeof state.onAllDone === 'function') {
+        state.onAllDone(state.banked);
+      }
+    } else {
+      var nextLevel = clearedIndex + 1;
+      showOverlay(
+        '<div class="bb-overlay-card">' +
+          '<div class="bb-overlay-title">Level ' + (clearedIndex + 1) + ' Cleared!</div>' +
+          '<p>+' + pts + ' pts saved 💖</p>' +
+          '<p class="bb-overlay-sub">Next up: Level ' + (nextLevel + 1) + '</p>' +
+        '</div>'
+      );
+      setTimeout(function () {
+        resetToLevelStart(nextLevel, false);
+        clearOverlay();
+        state.running = true;
+        state.lastTs = 0;
+        cancelFrame();
+        launchStuckBalls();
+        rafId = window.requestAnimationFrame(loop);
+      }, 1300);
     }
   }
 
@@ -858,7 +857,7 @@
   function renderHud() {
     if (refs.level) refs.level.textContent = (state.level + 1);
     if (refs.score) refs.score.textContent = state.banked;
-    if (refs.lives) refs.lives.textContent = state.lives;
+    if (refs.lives) refs.lives.textContent = '∞';
   }
 
   function setButtonStates() {
@@ -908,7 +907,6 @@
     init: init,
     start: start,
     retryLevel: retryLevel,
-    endRun: endRun,
     stop: stop
   };
 })();

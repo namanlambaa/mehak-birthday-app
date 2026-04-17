@@ -126,6 +126,77 @@ window.Store = (function () {
     });
   }
 
+  // ==================== Brick Breaker ====================
+  // Points per level cleared (0-indexed: levels 1..4 = 84 pts each, level 5 = 500).
+  var BB_LEVEL_POINTS = [84, 84, 84, 84, 500];
+  var BB_TOTAL_LEVELS = BB_LEVEL_POINTS.length;
+
+  function getBbLevelsCleared(userData) {
+    return userData && userData.bbLevelsCleared ? userData.bbLevelsCleared : 0;
+  }
+
+  function isBbCompleted(userData) {
+    return userData && userData.bbCompleted === true;
+  }
+
+  function getBbTotalEarned(userData) {
+    return userData && userData.bbTotalEarned ? userData.bbTotalEarned : 0;
+  }
+
+  // Called whenever a level is cleared. levelIndex is 0-indexed.
+  // Only credits points if the user is clearing the next expected level
+  // (prevents double-crediting on retries of an already-cleared level).
+  function submitBbLevelClear(levelIndex) {
+    var db = DB.getDb();
+    if (!db) return Promise.reject(new Error('No database'));
+    var ref = db.collection('users').doc('mehak');
+
+    return ref.get().then(function (snap) {
+      var data = snap.exists ? snap.data() : { points: 0, contestsPlayed: 0, bbLevelsCleared: 0, bbTotalEarned: 0 };
+      var cleared = data.bbLevelsCleared || 0;
+      var totalEarned = data.bbTotalEarned || 0;
+
+      if (levelIndex < cleared) {
+        // Already cleared this level before — no double credit.
+        return {
+          alreadyCleared: true,
+          cleared: cleared,
+          totalEarned: totalEarned,
+          completed: data.bbCompleted === true,
+          pointsAdded: 0
+        };
+      }
+
+      var pts = BB_LEVEL_POINTS[levelIndex] || 0;
+      var newCleared = levelIndex + 1;
+      var isFirstEver = cleared === 0;
+      var nowCompleted = newCleared >= BB_TOTAL_LEVELS;
+
+      var update = {
+        bbLevelsCleared: newCleared,
+        bbTotalEarned: totalEarned + pts,
+        points: firebase.firestore.FieldValue.increment(pts)
+      };
+      if (isFirstEver) {
+        update.contestsPlayed = firebase.firestore.FieldValue.increment(1);
+        update.lastPlayedDate = AppConfig.getTodayString();
+      }
+      if (nowCompleted) {
+        update.bbCompleted = true;
+      }
+
+      return ref.set(update, { merge: true }).then(function () {
+        return {
+          alreadyCleared: false,
+          cleared: newCleared,
+          totalEarned: totalEarned + pts,
+          completed: nowCompleted,
+          pointsAdded: pts
+        };
+      });
+    });
+  }
+
   return {
     getUserDoc: getUserDoc,
     getCurrentContest: getCurrentContest,
@@ -137,6 +208,12 @@ window.Store = (function () {
     getMazeTriesLeft: getMazeTriesLeft,
     isMazeCompleted: isMazeCompleted,
     submitMazeTry: submitMazeTry,
-    MAZE_MAX_TRIES: MAZE_MAX_TRIES
+    MAZE_MAX_TRIES: MAZE_MAX_TRIES,
+    getBbLevelsCleared: getBbLevelsCleared,
+    isBbCompleted: isBbCompleted,
+    getBbTotalEarned: getBbTotalEarned,
+    submitBbLevelClear: submitBbLevelClear,
+    BB_LEVEL_POINTS: BB_LEVEL_POINTS,
+    BB_TOTAL_LEVELS: BB_TOTAL_LEVELS
   };
 })();

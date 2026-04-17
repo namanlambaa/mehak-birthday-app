@@ -11,11 +11,19 @@ service cloud.firestore {
     // User data: anyone can read mehak's doc; updates limited to known fields
     match /users/mehak {
       allow read: if true;
-      allow update: if
-        request.resource.data.keys().hasOnly(['points', 'contestsPlayed', 'lastPlayedDate'])
-        && request.resource.data.points is number
-        && request.resource.data.contestsPlayed is number
-        && request.resource.data.lastPlayedDate is string;
+      allow update: if request.resource.data.keys().hasOnly([
+        'points',
+        'contestsPlayed',
+        'lastPlayedDate',
+        'flappyTriesUsed',
+        'flappyTotalEarned',
+        'mazeTriesUsed',
+        'mazeTotalEarned',
+        'mazeCompleted',
+        'bbLevelsCleared',
+        'bbTotalEarned',
+        'bbCompleted'
+      ]);
       allow create: if true;
       allow delete: if false;
     }

@@ -40,7 +40,6 @@
     els.bbBack = document.getElementById('bb-back');
     els.bbStart = document.getElementById('bb-start');
     els.bbRetry = document.getElementById('bb-retry');
-    els.bbClaim = document.getElementById('bb-claim');
     els.bbStatus = document.getElementById('bb-status');
 
     els.modalOverlay = document.getElementById('modal-overlay');
@@ -115,11 +114,6 @@
         if (window.BrickBreakerGame) BrickBreakerGame.retryLevel();
       });
     }
-    if (els.bbClaim) {
-      els.bbClaim.addEventListener('click', function () {
-        if (window.BrickBreakerGame) BrickBreakerGame.endRun();
-      });
-    }
   }
 
   // ==================== Login ====================
@@ -186,11 +180,27 @@
         return Store.getCurrentContest().then(function (contest) {
           var isFlappy = contest && contest.type === 'flappy';
           var isMaze = contest && contest.type === 'memory-maze';
+          var isBrickBreaker = contest && contest.type === 'brickbreaker';
 
           if (isAdmin) {
             els.btnPlay.disabled = false;
             els.playStatus.textContent = '🔧 Admin mode — testing only';
             els.playStatus.hidden = false;
+          } else if (isBrickBreaker) {
+            if (Store.isBbCompleted(data)) {
+              els.btnPlay.disabled = true;
+              els.playStatus.textContent = 'Brick Breaker conquered! Earned: ' + Store.getBbTotalEarned(data) + ' pts 💖';
+              els.playStatus.hidden = false;
+            } else {
+              var cleared = Store.getBbLevelsCleared(data);
+              els.btnPlay.disabled = false;
+              if (cleared > 0) {
+                els.playStatus.textContent = 'Continue from Level ' + (cleared + 1) + ' 🧱 (' + Store.getBbTotalEarned(data) + ' pts earned)';
+              } else {
+                els.playStatus.textContent = '5 levels to conquer 🧱';
+              }
+              els.playStatus.hidden = false;
+            }
           } else if (isMaze) {
             if (Store.isMazeCompleted(data)) {
               els.btnPlay.disabled = true;
@@ -617,64 +627,95 @@
       els.bbStatus.textContent = '';
     }
 
-    // If already played today (non-admin), show locked state.
     Store.getUserDoc().then(function (data) {
-      if (!Auth.isAdmin() && Store.hasPlayedToday(data)) {
-        if (els.bbStatus) {
+      var cleared = Store.getBbLevelsCleared(data);
+      var earned = Store.getBbTotalEarned(data);
+      var completed = Store.isBbCompleted(data);
+
+      // Admin always starts fresh so new contests can be tested cleanly.
+      if (Auth.isAdmin()) {
+        cleared = 0;
+        earned = 0;
+        completed = false;
+      }
+
+      if (els.bbStatus) {
+        if (completed) {
           els.bbStatus.hidden = false;
-          els.bbStatus.textContent = "You've already claimed points today. Come back tomorrow 💫";
+          els.bbStatus.textContent = 'All 5 levels already cleared. Earned ' + earned + ' pts 💖';
+        } else if (cleared > 0) {
+          els.bbStatus.hidden = false;
+          els.bbStatus.textContent = 'Resuming at Level ' + (cleared + 1) + '. ' + earned + ' pts already banked.';
+        } else {
+          els.bbStatus.hidden = true;
         }
-        if (els.bbStart) els.bbStart.disabled = true;
-        if (els.bbRetry) els.bbRetry.disabled = true;
-        if (els.bbClaim) els.bbClaim.disabled = true;
-      } else {
-        if (els.bbStart) els.bbStart.disabled = false;
-        if (els.bbRetry) els.bbRetry.disabled = false;
-        if (els.bbClaim) els.bbClaim.disabled = false;
       }
 
       BrickBreakerGame.init({
-        onClaimPoints: handleBrickBreakerClaim
+        startLevel: cleared,
+        initialBanked: earned,
+        alreadyCompleted: completed,
+        onLevelCleared: handleBrickBreakerLevelCleared,
+        onAllDone: handleBrickBreakerAllDone
       });
-    }).catch(function () {
+    }).catch(function (err) {
+      console.error('Failed to load BB progress:', err);
       BrickBreakerGame.init({
-        onClaimPoints: handleBrickBreakerClaim
+        startLevel: 0,
+        initialBanked: 0,
+        alreadyCompleted: false,
+        onLevelCleared: handleBrickBreakerLevelCleared,
+        onAllDone: handleBrickBreakerAllDone
       });
     });
   }
 
-  function handleBrickBreakerClaim(pointsBanked) {
-    if (brickbreakerSubmitting) return;
-    brickbreakerSubmitting = true;
-
+  function handleBrickBreakerLevelCleared(levelIndex, points) {
     var isAdmin = Auth.isAdmin();
     if (isAdmin) {
-      brickbreakerSubmitting = false;
-      showModal('Admin test run. Banked: ' + pointsBanked + ' pts (no points saved).');
+      // Admin: don't write, just show a transient status.
+      if (els.bbStatus) {
+        els.bbStatus.hidden = false;
+        els.bbStatus.textContent = '🔧 Admin: Level ' + (levelIndex + 1) + ' cleared (+' + points + ' pts, not saved).';
+      }
       return;
     }
 
-    // Double-check user hasn't already claimed today
-    Store.getUserDoc()
-      .then(function (freshData) {
-        if (Store.hasPlayedToday(freshData)) {
-          brickbreakerSubmitting = false;
-          showModal("You've already claimed today! Points were already counted. 💖");
-          return;
+    Store.submitBbLevelClear(levelIndex)
+      .then(function (result) {
+        if (els.bbStatus) {
+          els.bbStatus.hidden = false;
+          if (result.alreadyCleared) {
+            els.bbStatus.textContent = 'Level ' + (levelIndex + 1) + ' already cleared earlier — no extra points.';
+          } else {
+            els.bbStatus.textContent = '+' + result.pointsAdded + ' pts saved. Total from Brick Breaker: ' + result.totalEarned + ' pts.';
+          }
         }
-
-        return Store.submitContest(pointsBanked || 0).then(function () {
-          brickbreakerSubmitting = false;
-          if (window.BrickBreakerGame) BrickBreakerGame.stop();
-          Confetti.launch(3500);
-          showModal('+' + (pointsBanked || 0) + ' points added to your total 💖');
-        });
       })
       .catch(function (err) {
-        console.error('Brick Breaker claim failed:', err);
-        brickbreakerSubmitting = false;
-        alert('Something went wrong. Please try again.');
+        console.error('BB level clear save failed:', err);
+        if (els.bbStatus) {
+          els.bbStatus.hidden = false;
+          els.bbStatus.textContent = '⚠️ Could not save level progress. Check your connection.';
+        }
       });
+  }
+
+  function handleBrickBreakerAllDone(totalBanked) {
+    if (brickbreakerSubmitting) return;
+    brickbreakerSubmitting = true;
+
+    if (Auth.isAdmin()) {
+      brickbreakerSubmitting = false;
+      showModal('Admin victory run. Total: ' + totalBanked + ' pts (not saved).');
+      return;
+    }
+
+    // All individual level points were already saved via handleBrickBreakerLevelCleared.
+    // Here we just celebrate.
+    Confetti.launch(4500);
+    brickbreakerSubmitting = false;
+    showModal('You conquered all 5 levels! Total earned: ' + totalBanked + ' pts 💖');
   }
 
   // ==================== Modal ====================
