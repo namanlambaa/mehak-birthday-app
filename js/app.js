@@ -44,6 +44,25 @@
 
     els.modalOverlay = document.getElementById('modal-overlay');
     els.btnModalHome = document.getElementById('btn-modal-home');
+
+    // Compensation / wheel / slider
+    els.compensationBlock = document.getElementById('compensation-block');
+    els.btnCompensation = document.getElementById('btn-compensation');
+    els.compBack = document.getElementById('comp-back');
+    els.compCodeInput = document.getElementById('comp-code-input');
+    els.compError = document.getElementById('comp-error');
+    els.btnCompRedeem = document.getElementById('btn-comp-redeem');
+
+    els.modalCompResult = document.getElementById('modal-comp-result');
+    els.btnCompSpin = document.getElementById('btn-comp-spin');
+    els.btnCompClaim = document.getElementById('btn-comp-claim');
+
+    els.wheelBack = document.getElementById('wheel-back');
+    els.btnSpin = document.getElementById('btn-spin');
+    els.wheelStatus = document.getElementById('wheel-status');
+
+    els.sliderBack = document.getElementById('slider-back');
+    els.btnSliderShuffle = document.getElementById('btn-slider-shuffle');
   }
 
   // ==================== Boot ====================
@@ -114,6 +133,55 @@
         if (window.BrickBreakerGame) BrickBreakerGame.retryLevel();
       });
     }
+
+    // Compensation flow
+    if (els.btnCompensation) {
+      els.btnCompensation.addEventListener('click', openCompensationView);
+    }
+    if (els.compBack) {
+      els.compBack.addEventListener('click', function () { showDashboard(); });
+    }
+    if (els.btnCompRedeem) {
+      els.btnCompRedeem.addEventListener('click', handleCompRedeem);
+    }
+    if (els.compCodeInput) {
+      els.compCodeInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleCompRedeem();
+        }
+      });
+    }
+    if (els.btnCompClaim) {
+      els.btnCompClaim.addEventListener('click', handleCompClaim);
+    }
+    if (els.btnCompSpin) {
+      els.btnCompSpin.addEventListener('click', handleCompGoSpin);
+    }
+
+    // Wheel
+    if (els.wheelBack) {
+      els.wheelBack.addEventListener('click', function () {
+        if (window.Wheel) Wheel.stop();
+        showDashboard();
+      });
+    }
+    if (els.btnSpin) {
+      els.btnSpin.addEventListener('click', handleWheelSpin);
+    }
+
+    // Slider
+    if (els.sliderBack) {
+      els.sliderBack.addEventListener('click', function () {
+        if (window.SliderPuzzle) SliderPuzzle.stop();
+        showDashboard();
+      });
+    }
+    if (els.btnSliderShuffle) {
+      els.btnSliderShuffle.addEventListener('click', function () {
+        if (window.SliderPuzzle) SliderPuzzle.reshuffle();
+      });
+    }
   }
 
   // ==================== Login ====================
@@ -153,6 +221,12 @@
     if (window.MemoryMaze) {
       MemoryMaze.stop();
     }
+    if (window.Wheel) {
+      Wheel.stop();
+    }
+    if (window.SliderPuzzle) {
+      SliderPuzzle.stop();
+    }
     Router.navigate('view-dashboard');
     loadDashboardData();
   }
@@ -175,12 +249,19 @@
         markLoaded(els.statPlayed);
         markLoaded(els.statPoints);
 
+        // Compensation block: show only if not yet redeemed.
+        if (els.compensationBlock) {
+          els.compensationBlock.hidden = !!data.compensationRedeemed;
+        }
+
         var isAdmin = Auth.isAdmin();
 
         return Store.getCurrentContest().then(function (contest) {
           var isFlappy = contest && contest.type === 'flappy';
           var isMaze = contest && contest.type === 'memory-maze';
           var isBrickBreaker = contest && contest.type === 'brickbreaker';
+          var noContestConfigured = !contest;
+          var sliderDone = Store.isSliderCompleted(data);
 
           if (isAdmin) {
             els.btnPlay.disabled = false;
@@ -229,6 +310,16 @@
               els.playStatus.textContent = triesLeft + ' graded tries remaining 🎮';
               els.playStatus.hidden = false;
             }
+          } else if (noContestConfigured) {
+            if (sliderDone) {
+              els.btnPlay.disabled = true;
+              els.playStatus.textContent = 'Slider puzzle solved! +500 pts 💖';
+              els.playStatus.hidden = false;
+            } else {
+              els.btnPlay.disabled = false;
+              els.playStatus.textContent = "Slide Mehak's face together 🧩";
+              els.playStatus.hidden = false;
+            }
           } else if (Store.hasPlayedToday(data)) {
             els.btnPlay.disabled = true;
             els.playStatus.textContent = "You've already played today! Come back tomorrow 💫";
@@ -254,6 +345,7 @@
     els.statPoints.textContent = '—';
     els.playStatus.hidden = true;
     els.btnPlay.disabled = true;
+    if (els.compensationBlock) els.compensationBlock.hidden = true;
     userData = null;
     currentContest = null;
   }
@@ -273,9 +365,15 @@
           } catch (e) { /* ignore */ }
         }
         if (!contest) {
-          els.btnPlay.disabled = false;
-          els.playStatus.textContent = 'No contest available today. Check back later!';
-          els.playStatus.hidden = false;
+          // No Firestore contest configured: fall back to the slider puzzle
+          // (used to compensate for missed contest days).
+          if (userData && Store.isSliderCompleted(userData) && !Auth.isAdmin()) {
+            els.btnPlay.disabled = true;
+            els.playStatus.textContent = 'Slider puzzle solved! +500 pts 💖';
+            els.playStatus.hidden = false;
+            return;
+          }
+          openSliderContest();
           return;
         }
 
@@ -716,6 +814,209 @@
     Confetti.launch(4500);
     brickbreakerSubmitting = false;
     showModal('You conquered all 5 levels! Total earned: ' + totalBanked + ' pts 💖');
+  }
+
+  // ==================== Compensation ====================
+  function openCompensationView() {
+    if (els.compCodeInput) els.compCodeInput.value = '';
+    if (els.compError) els.compError.hidden = true;
+    if (els.btnCompRedeem) {
+      els.btnCompRedeem.disabled = false;
+      els.btnCompRedeem.textContent = 'Redeem';
+    }
+    Router.navigate('view-compensation');
+    setTimeout(function () {
+      if (els.compCodeInput) els.compCodeInput.focus();
+    }, 250);
+  }
+
+  function handleCompRedeem() {
+    if (!els.compCodeInput) return;
+    var code = (els.compCodeInput.value || '').trim();
+    if (code !== '6969') {
+      if (els.compError) els.compError.hidden = false;
+      shakeElement(els.compCodeInput);
+      return;
+    }
+
+    els.btnCompRedeem.disabled = true;
+    els.btnCompRedeem.textContent = 'Redeeming…';
+
+    var isAdmin = Auth.isAdmin();
+    if (isAdmin) {
+      setTimeout(function () {
+        els.btnCompRedeem.textContent = 'Redeem';
+        els.btnCompRedeem.disabled = false;
+        showCompResultModal();
+      }, 300);
+      return;
+    }
+
+    Store.submitCompensation()
+      .then(function (result) {
+        els.btnCompRedeem.textContent = 'Redeem';
+        els.btnCompRedeem.disabled = false;
+        // Refresh cached userData's compensation flag so dashboard hides the block.
+        if (userData) {
+          userData.compensationRedeemed = true;
+          userData.compensationPoints = Store.COMPENSATION_POINTS;
+          userData.points = (userData.points || 0) + (result.pointsAdded || 0);
+        }
+        Confetti.launch(2500);
+        showCompResultModal(result.already);
+      })
+      .catch(function (err) {
+        console.error('Compensation submit failed:', err);
+        els.btnCompRedeem.textContent = 'Redeem';
+        els.btnCompRedeem.disabled = false;
+        alert('Something went wrong. Please try again.');
+      });
+  }
+
+  function showCompResultModal(already) {
+    if (!els.modalCompResult) return;
+    // If wheel already spun (e.g. admin testing or revisit), don't offer spin again.
+    var wheelAlreadyDone = userData && userData.wheelSpun;
+    if (els.btnCompSpin) {
+      els.btnCompSpin.hidden = !!wheelAlreadyDone;
+    }
+    var title = els.modalCompResult.querySelector('.modal-title');
+    var text = els.modalCompResult.querySelector('.modal-text');
+    if (title) {
+      title.textContent = already
+        ? 'Already redeemed 💖'
+        : '+576 points earned!';
+    }
+    if (text) {
+      text.textContent = wheelAlreadyDone
+        ? 'Your points are safe. Head back to the dashboard.'
+        : 'Claim your points now, or try your luck on the wheel for even more.';
+    }
+    els.modalCompResult.hidden = false;
+  }
+
+  function hideCompResultModal() {
+    if (els.modalCompResult) els.modalCompResult.hidden = true;
+  }
+
+  function handleCompClaim() {
+    hideCompResultModal();
+    // Forfeit the wheel: one-time lock per plan.
+    if (Auth.isAdmin()) {
+      showDashboard();
+      return;
+    }
+    Store.markWheelForfeited()
+      .catch(function (err) {
+        console.error('Wheel forfeit failed:', err);
+      })
+      .then(function () {
+        if (userData) {
+          userData.wheelSpun = true;
+          userData.wheelPoints = 0;
+        }
+        showDashboard();
+      });
+  }
+
+  function handleCompGoSpin() {
+    hideCompResultModal();
+    openWheelView();
+  }
+
+  // ==================== Wheel ====================
+  function openWheelView() {
+    Router.navigate('view-wheel');
+    if (els.wheelStatus) {
+      els.wheelStatus.hidden = true;
+      els.wheelStatus.textContent = '';
+    }
+    if (els.btnSpin) {
+      els.btnSpin.disabled = false;
+      els.btnSpin.textContent = 'Spin!';
+    }
+    if (!window.Wheel) {
+      alert('Wheel failed to load.');
+      showDashboard();
+      return;
+    }
+    Wheel.init({ onResult: handleWheelResult });
+  }
+
+  function handleWheelSpin() {
+    if (!window.Wheel) return;
+    els.btnSpin.disabled = true;
+    els.btnSpin.textContent = 'Spinning…';
+    Wheel.spin();
+  }
+
+  function handleWheelResult(points) {
+    Confetti.launch(2500);
+
+    if (Auth.isAdmin()) {
+      showModal('Admin spin: landed on ' + points + ' pts (not saved).');
+      return;
+    }
+
+    Store.submitWheelSpin(points)
+      .then(function (result) {
+        if (userData) {
+          userData.wheelSpun = true;
+          userData.wheelPoints = points;
+          if (result.pointsAdded) {
+            userData.points = (userData.points || 0) + result.pointsAdded;
+          }
+        }
+        var msg;
+        if (points === 0) {
+          msg = 'The wheel landed on 0 — but you still have your 576 pts banked! 💖';
+        } else {
+          msg = '🎡 The wheel gave you +' + points + ' pts! Added to your total.';
+        }
+        showModal(msg);
+      })
+      .catch(function (err) {
+        console.error('Wheel submit failed:', err);
+        alert('Something went wrong. Please try again.');
+      });
+  }
+
+  // ==================== Slider Puzzle ====================
+  function openSliderContest() {
+    Router.navigate('view-slider');
+    if (!window.SliderPuzzle) {
+      alert('Slider puzzle failed to load.');
+      showDashboard();
+      return;
+    }
+    SliderPuzzle.init({ onComplete: handleSliderComplete });
+  }
+
+  function handleSliderComplete() {
+    if (Auth.isAdmin()) {
+      Confetti.launch(3500);
+      showModal('Admin test: slider solved! (no points saved)');
+      return;
+    }
+
+    Store.submitSlider()
+      .then(function (result) {
+        if (result.already) {
+          showModal('Already claimed — you solved this one before! 💖');
+          return;
+        }
+        if (userData) {
+          userData.sliderCompleted = true;
+          userData.sliderPoints = Store.SLIDER_POINTS;
+          userData.points = (userData.points || 0) + (result.pointsAdded || 0);
+        }
+        Confetti.launch(3500);
+        showModal('You solved it! +' + (result.pointsAdded || Store.SLIDER_POINTS) + ' pts added to your total 💖');
+      })
+      .catch(function (err) {
+        console.error('Slider submit failed:', err);
+        alert('Something went wrong. Please try again.');
+      });
   }
 
   // ==================== Modal ====================

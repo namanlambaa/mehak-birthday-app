@@ -965,3 +965,213 @@
   border: 1px solid var(--glass-border);
   background: rgba(255, 255, 255, 0.55);
 }
+
+/* ===== Compensation Block (on dashboard) ===== */
+.compensation-block {
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+  border: 1px solid rgba(232, 135, 156, 0.35);
+}
+
+.compensation-text {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ===== Compensation View ===== */
+.comp-scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 24px;
+}
+
+.comp-body {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.comp-instructions {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.comp-instructions-sub {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.comp-input-group {
+  margin-top: 6px;
+}
+
+.comp-code-input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--glass-border);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-align: center;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.comp-code-input:focus {
+  border-color: var(--accent-pink-light);
+  box-shadow: 0 0 0 3px rgba(232, 135, 156, 0.15);
+}
+
+.comp-error {
+  color: var(--accent-rose);
+  font-size: 0.82rem;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* ===== Compensation result modal (two-button) ===== */
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.modal-comp .modal-text {
+  margin-bottom: 14px;
+}
+
+.modal-comp .btn-ghost {
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* ===== Wheel View ===== */
+.wheel-scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 24px;
+  align-items: stretch;
+}
+
+.wheel-subtitle {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.wheel-stage {
+  position: relative;
+  padding: 28px 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+
+#wheel-canvas {
+  display: block;
+  width: 300px;
+  height: 300px;
+  max-width: 100%;
+}
+
+.wheel-pointer {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 22px solid var(--accent-pink);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.15));
+  z-index: 2;
+}
+
+/* ===== Slider Puzzle View ===== */
+.slider-scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 24px;
+}
+
+.slider-subtitle {
+  text-align: center;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.slider-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  aspect-ratio: 1 / 1;
+  padding: 6px;
+  max-width: 360px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.slider-tile {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  background-image: url('../assets/mehak.jpeg');
+  background-size: 300% 300%;
+  background-repeat: no-repeat;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 6px rgba(60, 48, 64, 0.12);
+}
+
+.slider-tile:active {
+  transform: scale(0.96);
+}
+
+.slider-tile-empty {
+  background-image: none;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px dashed rgba(232, 135, 156, 0.4);
+  cursor: default;
+  box-shadow: none;
+}
+
+.slider-tile-done {
+  box-shadow: 0 0 0 2px rgba(232, 135, 156, 0.65), 0 4px 12px rgba(60, 48, 64, 0.18);
+  animation: scaleIn 0.35s ease-out;
+}
+
+.slider-moves {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.slider-moves #slider-move-count {
+  color: var(--accent-pink);
+  font-weight: 700;
+}

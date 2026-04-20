@@ -71,6 +71,16 @@
         </div>
       </div>
 
+      <div id="compensation-block" class="compensation-block glass-card" hidden>
+        <p class="compensation-text">
+          Sorry bubs, I wasn't able to put up contests for 2 days —
+          but this way I'll make it up to you 💖
+        </p>
+        <button id="btn-compensation" class="btn btn-primary btn-full">
+          Compensation 🎁
+        </button>
+      </div>
+
       <button id="btn-play" class="btn btn-primary btn-full btn-play" disabled>
         Play Today's Contest
       </button>
@@ -210,6 +220,79 @@
     </div>
   </section>
 
+  <!-- ==================== COMPENSATION VIEW ==================== -->
+  <section id="view-compensation" class="view">
+    <div class="comp-scroll">
+      <button id="comp-back" class="btn-back">← Back</button>
+      <h1 class="contest-title">Compensation 🎁</h1>
+
+      <div class="comp-body glass-card">
+        <p class="comp-instructions">
+          Send Naman a sexy picture of yours on WhatsApp to redeem the code.
+        </p>
+        <p class="comp-instructions-sub">
+          Once he gets it, he'll share the secret code with you. Enter it below to claim
+          <strong>576 points</strong> 💖
+        </p>
+
+        <div class="comp-input-group">
+          <input type="text" id="comp-code-input" class="comp-code-input"
+            placeholder="Enter the code"
+            autocomplete="off" inputmode="numeric" maxlength="8" />
+          <p id="comp-error" class="comp-error" hidden>Oops, wrong code. Try again 💕</p>
+        </div>
+      </div>
+
+      <button id="btn-comp-redeem" class="btn btn-primary btn-full">Redeem</button>
+    </div>
+  </section>
+
+  <!-- ==================== WHEEL VIEW ==================== -->
+  <section id="view-wheel" class="view">
+    <div class="wheel-scroll">
+      <button id="wheel-back" class="btn-back">← Back</button>
+      <h1 class="contest-title">Spin the Wheel 🎡</h1>
+      <p class="wheel-subtitle">You've got one spin — good luck, babes!</p>
+
+      <div class="wheel-stage glass-card">
+        <div class="wheel-pointer" aria-hidden="true"></div>
+        <canvas id="wheel-canvas" aria-label="Prize wheel"></canvas>
+      </div>
+
+      <button id="btn-spin" class="btn btn-primary btn-full">Spin!</button>
+      <p id="wheel-status" class="play-status" hidden></p>
+    </div>
+  </section>
+
+  <!-- ==================== SLIDER PUZZLE VIEW ==================== -->
+  <section id="view-slider" class="view">
+    <div class="slider-scroll">
+      <button id="slider-back" class="btn-back">← Back</button>
+      <h1 class="contest-title">Today's Slider Puzzle 🧩</h1>
+      <p class="slider-subtitle">
+        Slide the tiles to restore Mehak's face. Solve it to earn <strong>500 pts</strong>!
+      </p>
+
+      <div id="slider-board" class="slider-board glass-card"></div>
+
+      <p id="slider-moves" class="slider-moves">Moves: <span id="slider-move-count">0</span></p>
+      <button id="btn-slider-shuffle" class="btn btn-ghost btn-full">Re-shuffle</button>
+    </div>
+  </section>
+
+  <!-- ==================== COMPENSATION RESULT MODAL ==================== -->
+  <div id="modal-comp-result" class="modal-overlay" hidden>
+    <div class="modal-card modal-comp glass-card">
+      <div class="modal-icon">💖</div>
+      <h2 class="modal-title">+576 points earned!</h2>
+      <p class="modal-text">Claim your points now, or try your luck on the wheel for even more.</p>
+      <div class="modal-actions">
+        <button id="btn-comp-spin" class="btn btn-primary btn-full">Spin the wheel 🎡</button>
+        <button id="btn-comp-claim" class="btn btn-ghost btn-full">Claim &amp; go to dashboard</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== SUCCESS MODAL ==================== -->
   <div id="modal-overlay" class="modal-overlay" hidden>
     <div class="modal-card glass-card">
@@ -241,6 +324,8 @@
   <script src="js/brickbreaker.js"></script>
   <script src="js/emoji.js"></script>
   <script src="js/memory-maze.js"></script>
+  <script src="js/wheel.js"></script>
+  <script src="js/slider-puzzle.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

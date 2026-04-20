@@ -197,6 +197,83 @@ window.Store = (function () {
     });
   }
 
+  // ==================== Compensation / Wheel / Slider ====================
+  var COMPENSATION_POINTS = 576;
+  var SLIDER_POINTS = 500;
+
+  function submitCompensation() {
+    var db = DB.getDb();
+    if (!db) return Promise.reject(new Error('No database'));
+    var ref = db.collection('users').doc('mehak');
+    return ref.get().then(function (snap) {
+      var data = snap.exists ? snap.data() : {};
+      if (data.compensationRedeemed) {
+        return { already: true, pointsAdded: 0 };
+      }
+      return ref.set({
+        compensationRedeemed: true,
+        compensationPoints: COMPENSATION_POINTS,
+        points: firebase.firestore.FieldValue.increment(COMPENSATION_POINTS)
+      }, { merge: true }).then(function () {
+        return { already: false, pointsAdded: COMPENSATION_POINTS };
+      });
+    });
+  }
+
+  function markWheelForfeited() {
+    var db = DB.getDb();
+    if (!db) return Promise.reject(new Error('No database'));
+    var ref = db.collection('users').doc('mehak');
+    return ref.set({ wheelSpun: true, wheelPoints: 0 }, { merge: true });
+  }
+
+  function submitWheelSpin(pointsWon) {
+    var db = DB.getDb();
+    if (!db) return Promise.reject(new Error('No database'));
+    var ref = db.collection('users').doc('mehak');
+    return ref.get().then(function (snap) {
+      var data = snap.exists ? snap.data() : {};
+      if (data.wheelSpun) {
+        return { already: true, pointsAdded: 0 };
+      }
+      var update = {
+        wheelSpun: true,
+        wheelPoints: pointsWon
+      };
+      if (pointsWon > 0) {
+        update.points = firebase.firestore.FieldValue.increment(pointsWon);
+      }
+      return ref.set(update, { merge: true }).then(function () {
+        return { already: false, pointsAdded: pointsWon };
+      });
+    });
+  }
+
+  function isSliderCompleted(userData) {
+    return userData && userData.sliderCompleted === true;
+  }
+
+  function submitSlider() {
+    var db = DB.getDb();
+    if (!db) return Promise.reject(new Error('No database'));
+    var ref = db.collection('users').doc('mehak');
+    return ref.get().then(function (snap) {
+      var data = snap.exists ? snap.data() : {};
+      if (data.sliderCompleted) {
+        return { already: true, pointsAdded: 0 };
+      }
+      return ref.set({
+        sliderCompleted: true,
+        sliderPoints: SLIDER_POINTS,
+        contestsPlayed: firebase.firestore.FieldValue.increment(1),
+        lastPlayedDate: AppConfig.getTodayString(),
+        points: firebase.firestore.FieldValue.increment(SLIDER_POINTS)
+      }, { merge: true }).then(function () {
+        return { already: false, pointsAdded: SLIDER_POINTS };
+      });
+    });
+  }
+
   return {
     getUserDoc: getUserDoc,
     getCurrentContest: getCurrentContest,
@@ -214,6 +291,13 @@ window.Store = (function () {
     getBbTotalEarned: getBbTotalEarned,
     submitBbLevelClear: submitBbLevelClear,
     BB_LEVEL_POINTS: BB_LEVEL_POINTS,
-    BB_TOTAL_LEVELS: BB_TOTAL_LEVELS
+    BB_TOTAL_LEVELS: BB_TOTAL_LEVELS,
+    submitCompensation: submitCompensation,
+    markWheelForfeited: markWheelForfeited,
+    submitWheelSpin: submitWheelSpin,
+    isSliderCompleted: isSliderCompleted,
+    submitSlider: submitSlider,
+    COMPENSATION_POINTS: COMPENSATION_POINTS,
+    SLIDER_POINTS: SLIDER_POINTS
   };
 })();
