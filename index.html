@@ -73,7 +73,7 @@
 
       <div id="compensation-block" class="compensation-block glass-card" hidden>
         <p class="compensation-text">
-          Sorry bubs, I wasn't able to put up contests for 2 days —
+          Sorry bubs, I wasn't able to put up contests for a few days —
           but this way I'll make it up to you 💖
         </p>
         <button id="btn-compensation" class="btn btn-primary btn-full">
@@ -280,6 +280,50 @@
     </div>
   </section>
 
+  <!-- ==================== BIRTHDAY LETTER VIEW ==================== -->
+  <section id="view-birthday" class="view">
+    <div class="bd-scroll">
+      <div class="bd-floating-emojis" aria-hidden="true">
+        <span>💖</span><span>🎀</span><span>🌷</span><span>✨</span><span>🎂</span><span>💕</span>
+      </div>
+
+      <div id="bd-letter-stage" class="bd-letter-stage">
+        <div class="bd-meta">
+          <span class="bd-meta-step">Placard <span id="bd-step">1</span> / <span id="bd-total">12</span></span>
+          <span class="bd-meta-points">Banked: <strong>+<span id="bd-banked">0</span></strong> pts</span>
+        </div>
+
+        <div id="bd-placard" class="bd-placard glass-card">
+          <div class="bd-placard-ribbon">For Mehak 💖</div>
+          <p id="bd-placard-text" class="bd-placard-text"></p>
+        </div>
+
+        <div id="bd-points-pop" class="bd-points-pop" hidden>+500 pts ✨</div>
+
+        <button id="btn-bd-next" class="btn btn-primary btn-full bd-next-btn">
+          Next →
+        </button>
+        <p class="bd-hint">Each placard adds <strong>+500 pts</strong> to your total 💖</p>
+      </div>
+
+      <div id="bd-finale-stage" class="bd-finale-stage" hidden>
+        <div class="bd-finale-emoji">🎂</div>
+        <h1 class="bd-finale-title">HAPPY BIRTHDAY<br/>MEHAK!</h1>
+        <p class="bd-finale-sub">25 looks beautiful on you 💖</p>
+        <div class="bd-finale-points-card glass-card">
+          <span class="bd-finale-points-label">From your birthday letter</span>
+          <span class="bd-finale-points-value">+<span id="bd-finale-points">6000</span> pts</span>
+        </div>
+        <p class="bd-finale-message">
+          I love you, meri jaan. Today, tomorrow, always 💕
+        </p>
+        <button id="btn-bd-finish" class="btn btn-primary btn-full">
+          Back to Dashboard
+        </button>
+      </div>
+    </div>
+  </section>
+
   <!-- ==================== COMPENSATION RESULT MODAL ==================== -->
   <div id="modal-comp-result" class="modal-overlay" hidden>
     <div class="modal-card modal-comp glass-card">
@@ -326,6 +370,7 @@
   <script src="js/memory-maze.js"></script>
   <script src="js/wheel.js"></script>
   <script src="js/slider-puzzle.js"></script>
+  <script src="js/birthday.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

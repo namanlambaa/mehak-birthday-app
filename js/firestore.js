@@ -274,6 +274,76 @@ window.Store = (function () {
     });
   }
 
+  // ==================== Birthday Letter ====================
+  // 12 placards × 500 pts = 6000 pts total. Each "Next" credits 500 pts
+  // independently so progress is preserved across reloads, and we never
+  // double-credit a placard the user has already advanced past.
+  var BIRTHDAY_LETTER_PER_STEP = 500;
+
+  function getBirthdayLetterIndex(userData) {
+    return userData && userData.birthdayLetterIndex ? userData.birthdayLetterIndex : 0;
+  }
+
+  function getBirthdayLetterEarned(userData) {
+    return userData && userData.birthdayLetterEarned ? userData.birthdayLetterEarned : 0;
+  }
+
+  function isBirthdayLetterCompleted(userData) {
+    return userData && userData.birthdayLetterCompleted === true;
+  }
+
+  // Called when the user clicks "Next" after reading placard `stepNumber`
+  // (1-based). Credits POINTS_PER_STEP iff this step hasn't been credited yet.
+  function submitBirthdayLetterStep(stepNumber) {
+    var db = DB.getDb();
+    if (!db) return Promise.reject(new Error('No database'));
+    var ref = db.collection('users').doc('mehak');
+
+    return ref.get().then(function (snap) {
+      var data = snap.exists ? snap.data() : {};
+      var savedIndex = data.birthdayLetterIndex || 0;
+      var earned = data.birthdayLetterEarned || 0;
+
+      if (stepNumber <= savedIndex) {
+        return {
+          alreadyClaimed: true,
+          pointsAdded: 0,
+          totalEarned: earned
+        };
+      }
+
+      var pts = BIRTHDAY_LETTER_PER_STEP;
+      var newEarned = earned + pts;
+
+      var update = {
+        birthdayLetterIndex: stepNumber,
+        birthdayLetterEarned: newEarned,
+        points: firebase.firestore.FieldValue.increment(pts)
+      };
+
+      // First-ever step counts as playing today's contest.
+      if (savedIndex === 0) {
+        update.contestsPlayed = firebase.firestore.FieldValue.increment(1);
+        update.lastPlayedDate = AppConfig.getTodayString();
+      }
+
+      return ref.set(update, { merge: true }).then(function () {
+        return {
+          alreadyClaimed: false,
+          pointsAdded: pts,
+          totalEarned: newEarned
+        };
+      });
+    });
+  }
+
+  function markBirthdayLetterCompleted() {
+    var db = DB.getDb();
+    if (!db) return Promise.reject(new Error('No database'));
+    var ref = db.collection('users').doc('mehak');
+    return ref.set({ birthdayLetterCompleted: true }, { merge: true });
+  }
+
   return {
     getUserDoc: getUserDoc,
     getCurrentContest: getCurrentContest,
@@ -298,6 +368,12 @@ window.Store = (function () {
     isSliderCompleted: isSliderCompleted,
     submitSlider: submitSlider,
     COMPENSATION_POINTS: COMPENSATION_POINTS,
-    SLIDER_POINTS: SLIDER_POINTS
+    SLIDER_POINTS: SLIDER_POINTS,
+    getBirthdayLetterIndex: getBirthdayLetterIndex,
+    getBirthdayLetterEarned: getBirthdayLetterEarned,
+    isBirthdayLetterCompleted: isBirthdayLetterCompleted,
+    submitBirthdayLetterStep: submitBirthdayLetterStep,
+    markBirthdayLetterCompleted: markBirthdayLetterCompleted,
+    BIRTHDAY_LETTER_PER_STEP: BIRTHDAY_LETTER_PER_STEP
   };
 })();

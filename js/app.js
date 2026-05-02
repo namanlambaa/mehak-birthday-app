@@ -227,6 +227,9 @@
     if (window.SliderPuzzle) {
       SliderPuzzle.stop();
     }
+    if (window.BirthdayLetter) {
+      BirthdayLetter.stop();
+    }
     Router.navigate('view-dashboard');
     loadDashboardData();
   }
@@ -239,6 +242,7 @@
     clearLoaded(els.statPlayed);
     clearLoaded(els.statPoints);
     els.btnPlay.disabled = true;
+    els.btnPlay.textContent = "Play Today's Contest";
     els.playStatus.hidden = true;
 
     Store.getUserDoc()
@@ -255,6 +259,39 @@
         }
 
         var isAdmin = Auth.isAdmin();
+        var isBirthdayToday = AppConfig.getTodayString() === AppConfig.BIRTHDAY;
+
+        // On the birthday itself, the letter takes priority over any other
+        // contest configured in Firestore — admins can still re-open it for
+        // testing because nothing is persisted in admin mode.
+        if (isBirthdayToday && (!Store.isBirthdayLetterCompleted(data) || isAdmin)) {
+          els.btnPlay.disabled = false;
+          var letterIdx = Store.getBirthdayLetterIndex(data);
+          els.btnPlay.textContent = letterIdx > 0
+            ? 'Continue your birthday letter 💌'
+            : 'Open your birthday letter 💌';
+          if (isAdmin) {
+            els.playStatus.textContent = '🔧 Admin mode — birthday letter test';
+            els.playStatus.hidden = false;
+          } else if (letterIdx > 0) {
+            els.playStatus.textContent = 'Resume from placard ' + (letterIdx + 1) + ' (' +
+              Store.getBirthdayLetterEarned(data) + ' pts banked) 💖';
+            els.playStatus.hidden = false;
+          } else {
+            els.playStatus.textContent = '12 placards just for you, meri jaan 💖';
+            els.playStatus.hidden = false;
+          }
+          return;
+        }
+
+        if (isBirthdayToday && Store.isBirthdayLetterCompleted(data)) {
+          els.btnPlay.disabled = true;
+          els.btnPlay.textContent = 'Birthday letter unwrapped 💖';
+          els.playStatus.textContent = 'Letter complete! Earned: ' +
+            Store.getBirthdayLetterEarned(data) + ' pts 💖';
+          els.playStatus.hidden = false;
+          return;
+        }
 
         return Store.getCurrentContest().then(function (contest) {
           var isFlappy = contest && contest.type === 'flappy';
@@ -345,6 +382,7 @@
     els.statPoints.textContent = '—';
     els.playStatus.hidden = true;
     els.btnPlay.disabled = true;
+    els.btnPlay.textContent = "Play Today's Contest";
     if (els.compensationBlock) els.compensationBlock.hidden = true;
     userData = null;
     currentContest = null;
@@ -353,6 +391,17 @@
   // ==================== Contest ====================
   function handlePlayContest() {
     els.btnPlay.disabled = true;
+
+    // On the birthday, run the special placard letter regardless of any
+    // Firestore-configured contest (unless she's already finished it and
+    // this isn't admin mode).
+    var isBirthdayToday = AppConfig.getTodayString() === AppConfig.BIRTHDAY;
+    var alreadyFinishedLetter = userData && Store.isBirthdayLetterCompleted(userData);
+    if (isBirthdayToday && (!alreadyFinishedLetter || Auth.isAdmin())) {
+      openBirthdayLetter();
+      return;
+    }
+
     Store.getCurrentContest()
       .then(function (contest) {
         // Admin-only URL override: ?contest=<type> lets us force-test a contest type locally.
@@ -979,6 +1028,63 @@
         console.error('Wheel submit failed:', err);
         alert('Something went wrong. Please try again.');
       });
+  }
+
+  // ==================== Birthday Letter ====================
+  function openBirthdayLetter() {
+    Router.navigate('view-birthday');
+
+    if (!window.BirthdayLetter) {
+      alert('Birthday letter failed to load.');
+      showDashboard();
+      return;
+    }
+
+    var isAdmin = Auth.isAdmin();
+    // Admin always starts fresh & does not persist anything.
+    var startIndex = (isAdmin || !userData) ? 0 : Store.getBirthdayLetterIndex(userData);
+    var bankedPoints = (isAdmin || !userData) ? 0 : Store.getBirthdayLetterEarned(userData);
+    var adminEarned = 0;
+
+    BirthdayLetter.init({
+      startIndex: startIndex,
+      bankedPoints: bankedPoints,
+      onStep: function (stepNumber) {
+        if (isAdmin) {
+          adminEarned += BirthdayLetter.POINTS_PER_PLACARD;
+          return Promise.resolve({
+            alreadyClaimed: false,
+            pointsAdded: BirthdayLetter.POINTS_PER_PLACARD,
+            totalEarned: adminEarned
+          });
+        }
+        return Store.submitBirthdayLetterStep(stepNumber).then(function (result) {
+          if (userData && !result.alreadyClaimed) {
+            userData.birthdayLetterIndex = stepNumber;
+            userData.birthdayLetterEarned = result.totalEarned;
+            userData.points = (userData.points || 0) + result.pointsAdded;
+          }
+          return result;
+        });
+      },
+      onFinish: function () {
+        if (isAdmin) {
+          showModal('Admin test complete. Total: ' + adminEarned + ' pts (not saved).');
+          showDashboard();
+          return;
+        }
+        Store.markBirthdayLetterCompleted()
+          .then(function () {
+            if (userData) userData.birthdayLetterCompleted = true;
+          })
+          .catch(function (err) {
+            console.error('Birthday letter complete-mark failed:', err);
+          })
+          .then(function () {
+            showDashboard();
+          });
+      }
+    });
   }
 
   // ==================== Slider Puzzle ====================
