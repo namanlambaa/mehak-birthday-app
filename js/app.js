@@ -45,17 +45,7 @@
     els.modalOverlay = document.getElementById('modal-overlay');
     els.btnModalHome = document.getElementById('btn-modal-home');
 
-    // Compensation / wheel / slider
-    els.compensationBlock = document.getElementById('compensation-block');
-    els.btnCompensation = document.getElementById('btn-compensation');
-    els.compBack = document.getElementById('comp-back');
-    els.compCodeInput = document.getElementById('comp-code-input');
-    els.compError = document.getElementById('comp-error');
-    els.btnCompRedeem = document.getElementById('btn-comp-redeem');
-
-    els.modalCompResult = document.getElementById('modal-comp-result');
-    els.btnCompSpin = document.getElementById('btn-comp-spin');
-    els.btnCompClaim = document.getElementById('btn-comp-claim');
+    els.birthdayMakeupWrap = document.getElementById('birthday-makeup-wrap');
 
     els.wheelBack = document.getElementById('wheel-back');
     els.btnSpin = document.getElementById('btn-spin');
@@ -132,31 +122,6 @@
       els.bbRetry.addEventListener('click', function () {
         if (window.BrickBreakerGame) BrickBreakerGame.retryLevel();
       });
-    }
-
-    // Compensation flow
-    if (els.btnCompensation) {
-      els.btnCompensation.addEventListener('click', openCompensationView);
-    }
-    if (els.compBack) {
-      els.compBack.addEventListener('click', function () { showDashboard(); });
-    }
-    if (els.btnCompRedeem) {
-      els.btnCompRedeem.addEventListener('click', handleCompRedeem);
-    }
-    if (els.compCodeInput) {
-      els.compCodeInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          handleCompRedeem();
-        }
-      });
-    }
-    if (els.btnCompClaim) {
-      els.btnCompClaim.addEventListener('click', handleCompClaim);
-    }
-    if (els.btnCompSpin) {
-      els.btnCompSpin.addEventListener('click', handleCompGoSpin);
     }
 
     // Wheel
@@ -244,6 +209,7 @@
     els.btnPlay.disabled = true;
     els.btnPlay.textContent = "Play Today's Contest";
     els.playStatus.hidden = true;
+    if (els.birthdayMakeupWrap) els.birthdayMakeupWrap.hidden = true;
 
     Store.getUserDoc()
       .then(function (data) {
@@ -253,11 +219,6 @@
         markLoaded(els.statPlayed);
         markLoaded(els.statPoints);
 
-        // Compensation block: show only if not yet redeemed.
-        if (els.compensationBlock) {
-          els.compensationBlock.hidden = !!data.compensationRedeemed;
-        }
-
         var isAdmin = Auth.isAdmin();
         var isBirthdayToday = AppConfig.getTodayString() === AppConfig.BIRTHDAY;
 
@@ -265,6 +226,7 @@
         // contest configured in Firestore — admins can still re-open it for
         // testing because nothing is persisted in admin mode.
         if (isBirthdayToday && (!Store.isBirthdayLetterCompleted(data) || isAdmin)) {
+          if (els.birthdayMakeupWrap) els.birthdayMakeupWrap.hidden = false;
           els.btnPlay.disabled = false;
           var letterIdx = Store.getBirthdayLetterIndex(data);
           els.btnPlay.textContent = letterIdx > 0
@@ -372,6 +334,7 @@
         els.statPoints.textContent = '—';
         markLoaded(els.statPlayed);
         markLoaded(els.statPoints);
+        if (els.birthdayMakeupWrap) els.birthdayMakeupWrap.hidden = true;
         els.btnPlay.disabled = false;
       });
   }
@@ -383,7 +346,7 @@
     els.playStatus.hidden = true;
     els.btnPlay.disabled = true;
     els.btnPlay.textContent = "Play Today's Contest";
-    if (els.compensationBlock) els.compensationBlock.hidden = true;
+    if (els.birthdayMakeupWrap) els.birthdayMakeupWrap.hidden = true;
     userData = null;
     currentContest = null;
   }
@@ -865,114 +828,6 @@
     showModal('You conquered all 5 levels! Total earned: ' + totalBanked + ' pts 💖');
   }
 
-  // ==================== Compensation ====================
-  function openCompensationView() {
-    if (els.compCodeInput) els.compCodeInput.value = '';
-    if (els.compError) els.compError.hidden = true;
-    if (els.btnCompRedeem) {
-      els.btnCompRedeem.disabled = false;
-      els.btnCompRedeem.textContent = 'Redeem';
-    }
-    Router.navigate('view-compensation');
-    setTimeout(function () {
-      if (els.compCodeInput) els.compCodeInput.focus();
-    }, 250);
-  }
-
-  function handleCompRedeem() {
-    if (!els.compCodeInput) return;
-    var code = (els.compCodeInput.value || '').trim();
-    if (code !== '6969') {
-      if (els.compError) els.compError.hidden = false;
-      shakeElement(els.compCodeInput);
-      return;
-    }
-
-    els.btnCompRedeem.disabled = true;
-    els.btnCompRedeem.textContent = 'Redeeming…';
-
-    var isAdmin = Auth.isAdmin();
-    if (isAdmin) {
-      setTimeout(function () {
-        els.btnCompRedeem.textContent = 'Redeem';
-        els.btnCompRedeem.disabled = false;
-        showCompResultModal();
-      }, 300);
-      return;
-    }
-
-    Store.submitCompensation()
-      .then(function (result) {
-        els.btnCompRedeem.textContent = 'Redeem';
-        els.btnCompRedeem.disabled = false;
-        // Refresh cached userData's compensation flag so dashboard hides the block.
-        if (userData) {
-          userData.compensationRedeemed = true;
-          userData.compensationPoints = Store.COMPENSATION_POINTS;
-          userData.points = (userData.points || 0) + (result.pointsAdded || 0);
-        }
-        Confetti.launch(2500);
-        showCompResultModal(result.already);
-      })
-      .catch(function (err) {
-        console.error('Compensation submit failed:', err);
-        els.btnCompRedeem.textContent = 'Redeem';
-        els.btnCompRedeem.disabled = false;
-        alert('Something went wrong. Please try again.');
-      });
-  }
-
-  function showCompResultModal(already) {
-    if (!els.modalCompResult) return;
-    // If wheel already spun (e.g. admin testing or revisit), don't offer spin again.
-    var wheelAlreadyDone = userData && userData.wheelSpun;
-    if (els.btnCompSpin) {
-      els.btnCompSpin.hidden = !!wheelAlreadyDone;
-    }
-    var title = els.modalCompResult.querySelector('.modal-title');
-    var text = els.modalCompResult.querySelector('.modal-text');
-    if (title) {
-      title.textContent = already
-        ? 'Already redeemed 💖'
-        : '+576 points earned!';
-    }
-    if (text) {
-      text.textContent = wheelAlreadyDone
-        ? 'Your points are safe. Head back to the dashboard.'
-        : 'Claim your points now, or try your luck on the wheel for even more.';
-    }
-    els.modalCompResult.hidden = false;
-  }
-
-  function hideCompResultModal() {
-    if (els.modalCompResult) els.modalCompResult.hidden = true;
-  }
-
-  function handleCompClaim() {
-    hideCompResultModal();
-    // Forfeit the wheel: one-time lock per plan.
-    if (Auth.isAdmin()) {
-      showDashboard();
-      return;
-    }
-    Store.markWheelForfeited()
-      .catch(function (err) {
-        console.error('Wheel forfeit failed:', err);
-      })
-      .then(function () {
-        if (userData) {
-          userData.wheelSpun = true;
-          userData.wheelPoints = 0;
-        }
-        showDashboard();
-      });
-  }
-
-  function handleCompGoSpin() {
-    hideCompResultModal();
-    openWheelView();
-  }
-
   // ==================== Wheel ====================
   function openWheelView() {
     Router.navigate('view-wheel');
@@ -1018,7 +873,7 @@
         }
         var msg;
         if (points === 0) {
-          msg = 'The wheel landed on 0 — but you still have your 576 pts banked! 💖';
+          msg = 'The wheel landed on 0 💖 Better luck another time!';
         } else {
           msg = '🎡 The wheel gave you +' + points + ' pts! Added to your total.';
         }

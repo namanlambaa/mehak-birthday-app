@@ -966,97 +966,23 @@
   background: rgba(255, 255, 255, 0.55);
 }
 
-/* ===== Compensation Block (on dashboard) ===== */
-.compensation-block {
+/* ===== Birthday makeup intro (above play button, birthday letter only) ===== */
+.birthday-makeup-wrap {
+  margin-bottom: 14px;
+}
+
+.birthday-makeup-card {
   padding: 18px 18px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
   text-align: center;
   border: 1px solid rgba(232, 135, 156, 0.35);
 }
 
-.compensation-text {
+.birthday-makeup-intro {
   font-size: 0.85rem;
   line-height: 1.5;
   color: var(--text-secondary);
   font-style: italic;
-}
-
-/* ===== Compensation View ===== */
-.comp-scroll {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding-bottom: 24px;
-}
-
-.comp-body {
-  padding: 24px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.comp-instructions {
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.comp-instructions-sub {
-  font-size: 0.82rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
-}
-
-.comp-input-group {
-  margin-top: 6px;
-}
-
-.comp-code-input {
-  width: 100%;
-  padding: 14px 18px;
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid var(--glass-border);
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-align: center;
-  color: var(--text-primary);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.comp-code-input:focus {
-  border-color: var(--accent-pink-light);
-  box-shadow: 0 0 0 3px rgba(232, 135, 156, 0.15);
-}
-
-.comp-error {
-  color: var(--accent-rose);
-  font-size: 0.82rem;
-  margin-top: 8px;
-  text-align: center;
-}
-
-/* ===== Compensation result modal (two-button) ===== */
-.modal-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.modal-comp .modal-text {
-  margin-bottom: 14px;
-}
-
-.modal-comp .btn-ghost {
-  border: 1px solid var(--glass-border);
-  background: rgba(255, 255, 255, 0.55);
+  margin: 0;
 }
 
 /* ===== Wheel View ===== */
