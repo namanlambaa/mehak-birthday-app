@@ -697,8 +697,8 @@
 
     // Background
     var grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, '#fde2e4');
-    grad.addColorStop(1, '#e7d6ef');
+    grad.addColorStop(0, '#e8f2ff');
+    grad.addColorStop(1, '#dbeafe');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
@@ -744,7 +744,7 @@
         }
         if (b.type === 2) {
           // Strong brick - red tint, cracked if hp==1
-          ctx.fillStyle = b.hp === 2 ? 'rgba(232, 60, 90, 0.38)' : 'rgba(232, 60, 90, 0.55)';
+          ctx.fillStyle = b.hp === 2 ? 'rgba(29, 78, 216, 0.38)' : 'rgba(29, 78, 216, 0.55)';
           ctx.fillRect(b.x, b.y, b.w, b.h);
           if (b.hp === 1) {
             ctx.strokeStyle = 'rgba(255,255,255,0.9)';
@@ -756,8 +756,8 @@
             ctx.stroke();
           }
         } else {
-          // Soft pink glow overlay
-          ctx.fillStyle = 'rgba(255, 200, 220, 0.18)';
+          // Soft blue glow overlay
+          ctx.fillStyle = 'rgba(191, 219, 254, 0.35)';
           ctx.fillRect(b.x, b.y, b.w, b.h);
         }
       }
@@ -767,7 +767,7 @@
       ctx.save();
       roundedPath(b.x, b.y, b.w, b.h, 5);
       ctx.lineWidth = 1.4;
-      ctx.strokeStyle = b.type === 3 ? 'rgba(60,70,80,0.65)' : 'rgba(232,135,156,0.85)';
+      ctx.strokeStyle = b.type === 3 ? 'rgba(60,70,80,0.65)' : 'rgba(37,99,235,0.85)';
       ctx.stroke();
       ctx.restore();
     }
@@ -778,8 +778,8 @@
     ctx.save();
     roundedPath(p.x, p.y, p.w, p.h, 6);
     var g = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
-    g.addColorStop(0, '#f7a8b8');
-    g.addColorStop(1, '#c9a7d4');
+    g.addColorStop(0, '#60a5fa');
+    g.addColorStop(1, '#2563eb');
     ctx.fillStyle = g;
     ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,0.7)';
@@ -805,7 +805,7 @@
       ctx.restore();
       ctx.beginPath();
       ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-      ctx.strokeStyle = '#e8879c';
+      ctx.strokeStyle = '#1d4ed8';
       ctx.lineWidth = 1.5;
       ctx.stroke();
     }
@@ -833,7 +833,7 @@
     for (var i = 0; i < state.particles.length; i++) {
       var p = state.particles[i];
       var a = Math.max(0, Math.min(1, p.life / 500));
-      ctx.fillStyle = 'rgba(232,135,156,' + a + ')';
+      ctx.fillStyle = 'rgba(37,99,235,' + a + ')';
       ctx.fillRect(p.x, p.y, 2, 2);
     }
   }

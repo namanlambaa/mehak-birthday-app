@@ -1,31 +1,32 @@
 :root {
-  --bg-start: #fde2e4;
-  --bg-end: #e2ece9;
-  --bg-gradient: linear-gradient(135deg, #fde2e4 0%, #fad2e1 30%, #e2ece9 70%, #dfe7fd 100%);
+  --bg-start: #f0f7ff;
+  --bg-end: #ffffff;
+  --bg-gradient: linear-gradient(135deg, #f8fbff 0%, #e8f2ff 35%, #f0f9ff 70%, #ffffff 100%);
 
-  --accent-pink: #e8879c;
-  --accent-pink-light: #f4a9ba;
-  --accent-lavender: #c3aed6;
-  --accent-peach: #f5cac3;
-  --accent-rose: #f28482;
+  /* Names kept for compatibility; values are the primary blue scale */
+  --accent-pink: #2563eb;
+  --accent-pink-light: #60a5fa;
+  --accent-lavender: #1d4ed8;
+  --accent-peach: #dbeafe;
+  --accent-rose: #dc2626;
 
-  --glass-bg: rgba(255, 255, 255, 0.42);
-  --glass-bg-heavy: rgba(255, 255, 255, 0.58);
-  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-bg-heavy: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.75);
   --glass-blur: 14px;
 
-  --text-primary: #3d3040;
-  --text-secondary: #7a6b80;
-  --text-muted: #a898ae;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
 
   --radius-sm: 14px;
   --radius-md: 20px;
   --radius-lg: 26px;
   --radius-full: 999px;
 
-  --shadow-soft: 0 4px 24px rgba(140, 100, 120, 0.10);
-  --shadow-card: 0 8px 32px rgba(140, 100, 120, 0.12);
-  --shadow-glow: 0 0 30px rgba(232, 135, 156, 0.25);
+  --shadow-soft: 0 4px 24px rgba(37, 99, 235, 0.08);
+  --shadow-card: 0 8px 32px rgba(37, 99, 235, 0.1);
+  --shadow-glow: 0 0 30px rgba(37, 99, 235, 0.22);
 
   --font: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
 

@@ -205,8 +205,8 @@
     ctx.clearRect(0, 0, w, h);
 
     var bg = ctx.createLinearGradient(0, 0, 0, h);
-    bg.addColorStop(0, '#cce6ff');
-    bg.addColorStop(1, '#f6d7e9');
+    bg.addColorStop(0, '#e8f2ff');
+    bg.addColorStop(1, '#ffffff');
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, w, h);
 
@@ -227,8 +227,8 @@
   }
 
   function drawPipes(h) {
-    ctx.fillStyle = '#80c98b';
-    ctx.strokeStyle = '#5ea669';
+    ctx.fillStyle = '#60a5fa';
+    ctx.strokeStyle = '#2563eb';
     ctx.lineWidth = 2;
 
     for (var i = 0; i < state.pipes.length; i++) {
@@ -247,9 +247,9 @@
   }
 
   function drawGround(w, h) {
-    ctx.fillStyle = '#f5b7c2';
+    ctx.fillStyle = '#dbeafe';
     ctx.fillRect(0, h - GROUND_H, w, GROUND_H);
-    ctx.fillStyle = '#ee9ab0';
+    ctx.fillStyle = '#93c5fd';
     ctx.fillRect(0, h - GROUND_H, w, 12);
   }
 
@@ -266,7 +266,7 @@
     if (birdImg.complete && birdImg.naturalWidth > 0) {
       ctx.drawImage(birdImg, b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
     } else {
-      ctx.fillStyle = '#ffd56b';
+      ctx.fillStyle = '#93c5fd';
       ctx.fill();
     }
 
@@ -274,7 +274,7 @@
 
     ctx.beginPath();
     ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-    ctx.strokeStyle = '#e8879c';
+    ctx.strokeStyle = '#2563eb';
     ctx.lineWidth = 2;
     ctx.stroke();
   }

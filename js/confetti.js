@@ -5,8 +5,8 @@ window.Confetti = (function () {
   var running = false;
 
   var COLORS = [
-    '#e8879c', '#f4a9ba', '#c3aed6', '#f5cac3',
-    '#f28482', '#dfe7fd', '#fde2e4', '#fad2e1'
+    '#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa',
+    '#93c5fd', '#bfdbfe', '#dbeafe', '#ffffff'
   ];
 
   function init() {

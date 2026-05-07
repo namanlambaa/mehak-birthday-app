@@ -2,14 +2,14 @@ window.Wheel = (function () {
   // Arranged so the same-value 0s are on opposite sides of the wheel.
   var SECTIONS = [500, 0, 100, 250, 10, 0, 150, 200];
   var COLORS = [
-    '#f28482', // rose
-    '#f6bd60', // gold
-    '#ffb5a7', // peach
-    '#b5ead7', // mint
-    '#c7ceea', // lavender
-    '#fcd5ce', // blush
-    '#a0c4ff', // sky
-    '#ffc8dd'  // pink
+    '#1e40af',
+    '#2563eb',
+    '#3b82f6',
+    '#60a5fa',
+    '#93c5fd',
+    '#bfdbfe',
+    '#dbeafe',
+    '#eff6ff'
   ];
 
   var canvas, ctx, cssSize, radius, cx, cy;
@@ -80,7 +80,7 @@ window.Wheel = (function () {
       ctx.rotate(start + arc / 2);
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#4a3a4e';
+      ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 16px Poppins, sans-serif';
       ctx.fillText(String(SECTIONS[i]), radius - 14, 0);
       ctx.restore();
@@ -92,15 +92,15 @@ window.Wheel = (function () {
     ctx.fillStyle = '#fff';
     ctx.fill();
     ctx.lineWidth = 3;
-    ctx.strokeStyle = '#e8879c';
+    ctx.strokeStyle = '#2563eb';
     ctx.stroke();
 
-    // Heart in center
-    ctx.fillStyle = '#e8879c';
+    // Accent in center
+    ctx.fillStyle = '#2563eb';
     ctx.font = '18px Poppins, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('♥', cx, cy + 1);
+    ctx.fillText('✦', cx, cy + 1);
   }
 
   function spin() {
